@@ -31,8 +31,13 @@ Line = require("lib.line")
 Boid = require("lib.boid")
 push = require("lib.push.push")
 
+recursiveBacktracker = require('map.recursive_backtracker')
+growingTree = require('map.growing_tree')
+
 Base = require("base")
 Game = require("game")
+Map = require("Map")
+Player = require("player")
 
 Direction = require("direction")
 

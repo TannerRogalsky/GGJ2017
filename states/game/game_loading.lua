@@ -42,7 +42,7 @@ function Loading:enteredState()
 
   local hexFormatStringPart = '%X '
   local numbers = {}
-  self.numbers_text = g.newText(self.preloaded_fonts['fixedsys_12'])
+  self.numbers_text = g.newText(self.preloaded_fonts['fixedsys_20'])
   local partWidth = self.numbers_text:getFont():getWidth(string.format(hexFormatStringPart, math.pow(2, 12)))
   local partsPerLine = math.ceil(g.getWidth() / partWidth)
   local lineHeight = self.numbers_text:getFont():getHeight()

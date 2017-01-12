@@ -11,8 +11,14 @@ function love.load(args)
   local gameWidth, gameHeight = love.graphics.getDimensions()
   -- local windowWidth, windowHeight = love.window.getDesktopDimensions()
   local windowWidth, windowHeight = 1920, 1080
+  -- local windowWidth, windowHeight = gameWidth, gameHeight
 
-  push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {fullscreen=false})
+  g.setDefaultFilter('nearest', 'nearest')
+  push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {
+    fullscreen = false,
+    resizable = false,
+    canvas = false,
+  })
 
   game = Game:new(k_args)
 end
@@ -87,11 +93,7 @@ function love.textinput(text)
 end
 
 function love.draw()
-  push:start()
-
   game:draw()
-
-  push:finish()
 end
 
 function love.focus(has_focus)
