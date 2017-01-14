@@ -1,4 +1,6 @@
 local Main = Game:addState('Main')
+local printGrid = require('map.print_grid')
+local symmetricalize = require('map.symmetricalize')
 
 local function physicsDebugDraw()
   for _,body in ipairs(game.world:getBodyList()) do
@@ -27,6 +29,8 @@ function Main:enteredState()
 
   local width, height = math.floor(16 / 2), math.floor(9 / 2)
   local grid = growingTree(width, height, {random = 1, newest = 1}, love.math.random(math.pow(2, 53)))
+  -- local grid = growingTree(width, height, {random = 1, newest = 1}, 0)
+  grid = symmetricalize(grid, 'both')
   self.map = Map:new(grid)
 
   self.players = {
@@ -68,6 +72,9 @@ function Main:mousereleased(x, y, button, isTouch)
 end
 
 function Main:keypressed(key, scancode, isrepeat)
+  if key == 'r' then
+    self:gotoState('Main')
+  end
 end
 
 function Main:keyreleased(key, scancode)

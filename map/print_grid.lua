@@ -4,6 +4,7 @@ local N, S, E, W = unpack(MAP_CONSTANTS.DIRECTIONS)
 local function printGrid(grid)
   local w = io.write
   local width, height = #grid[1], #grid
+  print(width, height)
   w(" ")
   for i=1,width * 2 - 1 do w("_") end
   print("")

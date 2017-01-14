@@ -1,30 +1,39 @@
 local Player = class('Player', Base)
-Player.static.SPEED = 1000
+Player.static.SPEED = 200
+
+local getUVs = require('getUVs')
 
 local radius = 20
 
 local function physicsCharacter(char)
   char.body = love.physics.newBody(game.world, char.x, char.y, 'dynamic')
   local shape = love.physics.newCircleShape(radius)
-  char.fixture = love.physics.newFixture(char.body, shape, 0.01)
-  -- char.body:setMass(0.05)
-  char.body:setLinearDamping(5)
+  char.fixture = love.physics.newFixture(char.body, shape, 1)
+
+  function char:setPositionFromBody()
+    char.x = char.body:getX()
+    char.y = char.body:getY()
+  end
 
   function char:setPosition(x, y)
-    char.x, char.y = x, y
     char.body:setPosition(x, y)
+    char:setPositionFromBody()
   end
 
   function char:applyForce(fx, fy)
     char.body:applyForce(fx, fy)
-    char.x = char.body:getX()
-    char.y = char.body:getY()
+    char:setPositionFromBody()
+  end
+
+  function char:setLinearVelocity(dx, dy)
+    char.body:setLinearVelocity(dx, dy)
+    char:setPositionFromBody()
   end
 
   return char
 end
 
-function Player:initialize(args)
+function Player:initialize()
   Base.initialize(self)
 
   self.joystick = love.joystick.getJoysticks()[1]
@@ -32,7 +41,7 @@ function Player:initialize(args)
   do
     local sprite_name = 'robot1_gun'
     local sprites = require('images.sprites')
-    local ua, va, ub, vb = sprites:getUVs(sprite_name)
+    local ua, va, ub, vb = getUVs(sprites, sprite_name)
     self.mesh = g.newMesh({
       {-radius, -radius, ua, va},
       {-radius, radius, ua, vb},
@@ -42,17 +51,19 @@ function Player:initialize(args)
     self.mesh:setTexture(sprites.texture)
   end
 
+  local ax, ay = game.map:gridToPixel(1, 1)
+  local dx, dy = game.map:gridToPixel(game.map.width, game.map.height)
   self.attackers = {
     physicsCharacter({
-      x = 100,
-      y = 100,
+      x = ax,
+      y = ay,
       rotation = 0
     })
   }
   self.defenders = {
     physicsCharacter({
-      x = 600,
-      y = 500,
+      x = dx,
+      y = dy,
       rotation = 0
     })
   }
@@ -64,14 +75,14 @@ function Player:update(dt)
     local dy = self.joystick:getGamepadAxis("lefty")
     local phi = math.atan2(dy, dx)
 
-    local fx, fy = dx * dt * Player.SPEED, dy * dt * Player.SPEED
+    local dx, dy = dx * Player.SPEED, dy * Player.SPEED
 
     attacker.rotation = phi
-    attacker:applyForce(fx, fy)
+    attacker:setLinearVelocity(dx, dy)
 
     for _,defender in ipairs(self.defenders) do
       defender.rotation = phi + math.pi
-      defender:applyForce(-dx * dt * Player.SPEED, -dy * dt * Player.SPEED)
+      defender:setLinearVelocity(-dx, -dy)
     end
   end
 end

@@ -1,5 +1,4 @@
 local Map = class('Map', Base)
-local printGrid = require('map.print_grid')
 local MAP_CONSTANTS = require('map.constants')
 local N, S, E, W = unpack(MAP_CONSTANTS.DIRECTIONS)
 
@@ -15,12 +14,25 @@ local bitmask = {
   [S + E] = 'tile_280',
   [S + W] = 'tile_281',
   [E + W] = 'tile_282',
+  [S + E + W] = 'tile_283',
+  [N + E + W] = 'tile_284',
   [N + S + E] = 'tile_310',
   [N + S + W] = 'tile_311',
-  [N + E + W] = 'tile_284',
-  [S + E + W] = 'tile_283',
   [N + S + E + W] = 'tile_341',
 }
+
+local bitmask_alt = {
+  [N + E] = 'tile_314',
+  [N + W] = 'tile_315',
+  [S + E] = 'tile_287',
+  [S + W] = 'tile_288',
+  [S + E + W] = 'tile_283',
+  [N + E + W] = 'tile_284',
+  [N + S + E] = 'tile_310',
+  [N + S + W] = 'tile_311',
+  [N + S + E + W] = 'tile_341',
+}
+
 
 local function buildPhysicsTerrain(world, grid)
   local body = love.physics.newBody(world, 0, 0, 'static')
@@ -61,6 +73,8 @@ function Map:initialize(grid)
 
   self.grid = grid
   self.body = buildPhysicsTerrain(game.world, grid)
+
+  self.width, self.height = #self.grid[1], #self.grid
 end
 
 function Map:draw()
@@ -75,21 +89,36 @@ function Map:draw()
     py = (y - 1) * h
     for x=1,width do
       px = (x - 1) * w
-      do
-        local tile_name = bitmask[self.grid[y][x]]
-        local quad = sprites.quads[tile_name]
-        local _, _, qw, qh = quad:getViewport()
-        g.draw(sprites.texture, quad, px, py, 0, w / qw, h / qh)
-      end
+
+      local tile_name = bitmask[self.grid[y][x]]
+      local quad = sprites.quads[tile_name]
+      local _, _, qw, qh = quad:getViewport()
+      g.draw(sprites.texture, quad, px, py, 0, w / qw, h / qh)
     end
   end
+
+  -- -- blank out center squares
+  -- for y=1,height-1 do
+  --   for x=1,width-1 do
+  --     if bit.band(self.grid[y][x], E) ~= 0 and
+  --        bit.band(self.grid[y][x + 1], S) ~= 0 and
+  --        bit.band(self.grid[y + 1][x + 1], W) ~= 0 and
+  --        bit.band(self.grid[y + 1][x], N) ~= 0 then
+  --       py = (y - 0.5) * h
+  --       px = (x - 0.5) * w
+  --       local quad = sprites.quads.tile_93
+  --       local _, _, qw, qh = quad:getViewport()
+  --       g.draw(sprites.texture, quad, px, py, 0, w / qw, h / qh)
+  --     end
+  --   end
+  -- end
   g.pop()
 end
 
 function Map:gridToPixel(x, y)
   local width, height = #self.grid[1], #self.grid
   local w, h = push:getWidth() / width, push:getHeight() / height
-  return (x - 1) * w, (y - 1) * h
+  return (x - 0.5) * w, (y - 0.5) * h
 end
 
 return Map
