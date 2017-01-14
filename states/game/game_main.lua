@@ -15,6 +15,8 @@ local function physicsDebugDraw()
         g.circle('fill', x, y, shape:getRadius())
       elseif shapeType == 'edge' then
         g.line(shape:getPoints())
+      elseif shapeType == 'polygon' then
+        g.polygon('line', shape:getPoints())
       end
       g.pop()
     end
@@ -27,8 +29,10 @@ function Main:enteredState()
 
   self.world = love.physics.newWorld(0, 0)
 
-  local width, height = math.floor(16 / 2), math.floor(9 / 2)
-  local grid = growingTree(width, height, {random = 1, newest = 1}, love.math.random(math.pow(2, 53)))
+  local width, height = math.floor(16 * 0.4), math.floor(9 * 0.4)
+  local seed = math.floor(love.math.random(math.pow(2, 53)))
+  print(string.format("Seed: %u", seed))
+  local grid = growingTree(width, height, {random = 1, newest = 1}, seed)
   -- local grid = growingTree(width, height, {random = 1, newest = 1}, 0)
   grid = symmetricalize(grid, 'both')
   self.map = Map:new(grid)
