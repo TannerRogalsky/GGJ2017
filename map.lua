@@ -135,22 +135,22 @@ local function buildExtrusionPhysicsTerrain(world, grid, size_x, size_y)
       px = (x - 1) * w
       if bit.band(grid[y][x], S) == 0 then
         local ew, eh = w, size_y
-        local shape = newRectangleShape(px + ew / 2, py + eh / 2 + h - size_y, ew, eh)
+        local shape = newRectangleShape(px + ew / 2, py + eh / 2 + h - size_y, ew + size_x * 2, eh)
         local fixture = newFixture(body, shape, 1)
       end
       if bit.band(grid[y][x], N) == 0 then
         local ew, eh = w, size_y
-        local shape = newRectangleShape(px + ew / 2, py + eh / 2, ew, eh)
+        local shape = newRectangleShape(px + ew / 2, py + eh / 2, ew + size_x * 2, eh)
         local fixture = newFixture(body, shape, 1)
       end
       if bit.band(grid[y][x], W) == 0 then
         local ew, eh = size_x, h
-        local shape = newRectangleShape(px + ew / 2, py + eh / 2, ew, eh)
+        local shape = newRectangleShape(px + ew / 2, py + eh / 2, ew, eh + size_y * 2)
         local fixture = newFixture(body, shape, 1)
       end
       if bit.band(grid[y][x], E) == 0 then
         local ew, eh = size_x, h
-        local shape = newRectangleShape(px + ew / 2 + w - size_x, py + eh / 2, ew, eh)
+        local shape = newRectangleShape(px + ew / 2 + w - size_x, py + eh / 2, ew, eh + size_y * 2)
         local fixture = newFixture(body, shape, 1)
       end
     end
