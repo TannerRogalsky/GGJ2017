@@ -181,6 +181,8 @@ function Map:initialize(grid)
   local size = 20
   local w, h = push:getWidth() / self.width, push:getHeight() / self.height
   self.body = buildExtrusionPhysicsTerrain(game.world, grid, size, size / (w / h))
+
+  self.deadends = findDeadEnds(self.grid)
 end
 
 function Map:draw()
@@ -201,6 +203,11 @@ function Map:draw()
       local _, _, qw, qh = quad:getViewport()
       g.draw(sprites.texture, quad, px, py, 0, w / qw, h / qh)
     end
+  end
+
+  g.setColor(255, 0, 0, 255 / 4)
+  for _,deadend in ipairs(self.deadends) do
+    g.rectangle('fill', (deadend.x - 1) * w, (deadend.y - 1) * h, w, h)
   end
   g.pop()
 end
