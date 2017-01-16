@@ -100,6 +100,27 @@ local function findDeadEnds(grid)
   return deadends
 end
 
+local function buildSpriteBatch(grid, width, height)
+  local sprites = game.sprites
+  local batch = g.newSpriteBatch(sprites.texture, width * height, 'static')
+  local w, h = push:getWidth() / width, push:getHeight() / height
+  local px, py
+  for y=1,height do
+    py = (y - 1) * h
+    for x=1,width do
+      px = (x - 1) * w
+      local bits = grid[y][x]
+      local tile_name = bitmask[bits]
+      local quad = sprites.quads[tile_name]
+      local _, _, qw, qh = quad:getViewport()
+      -- g.draw(sprites.texture, quad, px, py, 0, w / qw, h / qh)
+      batch:add(quad, px, py, 0, w / qw, h / qh)
+    end
+  end
+
+  return batch
+end
+
 function Map:initialize(grid)
   Base.initialize(self)
 
@@ -110,31 +131,20 @@ function Map:initialize(grid)
   local size = 20
   local w, h = push:getWidth() / self.width, push:getHeight() / self.height
   self.body = buildExtrusionPhysicsTerrain(game.world, grid, size, size / (w / h))
+  self.spritebatch = buildSpriteBatch(self.grid, self.width, self.height)
 
   self.deadends = findDeadEnds(self.grid)
 end
 
 function Map:draw()
-  local sprites = game.sprites
   local width, height = self.width, self.height
 
   g.push('all')
   g.setColor(255, 255, 255)
-  local w, h = push:getWidth() / width, push:getHeight() / height
-  local px, py
-  for y=1,height do
-    py = (y - 1) * h
-    for x=1,width do
-      px = (x - 1) * w
-      local bits = self.grid[y][x]
-      local tile_name = bitmask[bits]
-      local quad = sprites.quads[tile_name]
-      local _, _, qw, qh = quad:getViewport()
-      g.draw(sprites.texture, quad, px, py, 0, w / qw, h / qh)
-    end
-  end
+  g.draw(self.spritebatch)
 
   g.setColor(255, 0, 0, 255 / 4)
+  local w, h = push:getWidth() / width, push:getHeight() / height
   for _,deadend in ipairs(self.deadends) do
     g.rectangle('fill', (deadend.x - 1) * w, (deadend.y - 1) * h, w, h)
   end

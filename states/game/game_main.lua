@@ -1,6 +1,8 @@
 local Main = Game:addState('Main')
 local printGrid = require('map.print_grid')
 local symmetricalize = require('map.symmetricalize')
+local getLineOfSightPoints = require('light.get_line_of_sight_points')
+local buildLightOverlay = require('light.build_light_overlay')
 
 local function physicsDebugDraw()
   for _,body in ipairs(game.world:getBodyList()) do
@@ -23,44 +25,10 @@ local function physicsDebugDraw()
   end
 end
 
-local ray_hits = {}
-local function worldRayCastCallback(fixture, x, y, xn, yn, fraction)
-  table.insert(ray_hits, {
-    object = fixture:getUserData(),
-    x = x,
-    y = y,
-    xn = xn,
-    yn = yn,
-    fraction = fraction
-  })
-  return 1
-end
-
-local function rayCast(world, x1, y1, x2, y2, callback)
-  ray_hits = {}
-  world:rayCast(x1, y1, x2, y2, worldRayCastCallback)
-  return ray_hits
-end
-
-local function rayCastClosest(world, x1, y1, x2, y2, callback)
-  rayCast(world, x1, y1, x2, y2, callback)
-  if #ray_hits > 0 then
-    local closest_hit = ray_hits[1]
-    for i,hit in ipairs(ray_hits) do
-      if hit.fraction < closest_hit.fraction then
-        closest_hit = hit
-      end
-    end
-
-    return closest_hit
-  else
-    return nil
-  end
-end
-
 function Main:enteredState()
   local Camera = require("lib/camera")
   self.camera = Camera:new()
+  self.sprites = require('images.sprites')
 
   self.world = love.physics.newWorld(0, 0)
 
@@ -75,9 +43,7 @@ function Main:enteredState()
     Player:new()
   }
 
-  self.sprites = require('images.sprites')
-
-  self.mesh = g.newMesh(#self.map.body:getFixtureList() * 4 * 2, 'fan', 'stream')
+  self.light_overlay = g.newCanvas()
 
   g.setFont(self.preloaded_fonts["04b03_16"])
 end
@@ -89,68 +55,20 @@ function Main:update(dt)
   end
 end
 
-local function len(x, y)
-  return x * x + y * y
-end
-
-local function getIsLess(a, b)
-  if a[1] >= 0 and b[1] < 0 then return true end
-  if a[1] < 0 and b[1] >= 0 then return false end
-  if a[1] == 0 and b[1] == 0 then
-    if a[2] >= 0 or b[2] >= 0 then return a[2] > b[2] end
-    return b[2] > a[2]
-  end
-
-  local det = a[1] * b[2] - b[1] * a[2]
-  if det < 0 then
-    return true
-  elseif det > 0 then
-    return false
-  end
-
-  local d1 = a[1] * a[1] + a[2] * a[2]
-  local d2 = b[1] * b[1] + b[2] * b[2]
-  return d1 > d2
-end
-
 function Main:draw()
   push:start()
   self.camera:set()
 
   self.map:draw()
 
-  physicsDebugDraw()
+  -- physicsDebugDraw()
 
-  do
-    local MAX_DIST = 200
-    local x1, y1 = self.players[1].attackers[1].x, self.players[1].attackers[1].y
-
-    local body = self.map.body
-    local bx, by = body:getPosition()
-    local hits = {}
-    for _,fixture in ipairs(body:getFixtureList()) do
-      local shape = fixture:getShape()
-      local points = {shape:getPoints()}
-      for i=1,8,2 do
-        local x2, y2 = bx + points[i], by + points[i + 1]
-        -- if len(x1 - x2, y1 - y2) <= MAX_DIST * MAX_DIST then
-          local hit = rayCastClosest(self.world, x1, y1, x2, y2)
-          if hit then
-            table.insert(hits, {hit.x - x1, hit.y - y1})
-          end
-        -- end
-      end
-    end
-
-    table.sort(hits, getIsLess)
-    table.insert(hits, {hits[1][1], hits[1][2]})
-    table.insert(hits, 1, {0, 0})
-    g.setColor(255, 255, 255)
-    self.mesh:setVertices(hits)
-    self.mesh:setDrawRange(1, #hits)
-    g.setWireframe(love.keyboard.isDown('space'))
-    g.draw(self.mesh, x1, y1)
-  end
+  g.push('all')
+  g.setCanvas(self.light_overlay)
+  g.clear(0, 0, 0, 255 * 0.6)
+  buildLightOverlay(self.players[1].attackers[1].x, self.players[1].attackers[1].y)
+  buildLightOverlay(self.players[1].defenders[1].x, self.players[1].defenders[1].y)
+  g.pop()
 
   for i,player in ipairs(self.players) do
     player:draw()
@@ -158,6 +76,14 @@ function Main:draw()
 
   self.camera:unset()
   push:finish()
+
+  g.draw(self.light_overlay)
+
+  if self.debug then
+    g.setColor(0, 255, 0)
+    g.print(love.timer.getFPS(), 0, 0)
+    g.setColor(255, 255, 255)
+  end
 end
 
 function Main:mousepressed(x, y, button, isTouch)
