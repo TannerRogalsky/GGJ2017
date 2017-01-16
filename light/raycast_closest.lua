@@ -1,28 +1,14 @@
 local ray_hits = {}
+for i=1,1000 do
+  ray_hits[i] = {x = 0, y = 0, fraction = 0}
+end
 local num_hits = 0
-
--- Private constructor.
-local function new(x, y, fraction)
-  return setmetatable({
-    x = x,
-    y = y,
-    fraction = fraction
-  })
-end
-
--- Do the check to see if JIT is enabled. If so use the optimized FFI structs.
-local status, ffi
-if type(jit) == "table" and jit.status() then
-  status, ffi = pcall(require, "ffi")
-  if status then
-    ffi.cdef "typedef struct { double x, y, fraction; } ray_hit;"
-    new = ffi.typeof("ray_hit")
-  end
-end
 
 local function worldRayCastCallback(fixture, x, y, xn, yn, fraction)
   num_hits = num_hits + 1
-  ray_hits[num_hits] = new(x, y, fraction)
+  ray_hits[num_hits].x = x
+  ray_hits[num_hits].y = y
+  ray_hits[num_hits].fraction = fraction
   return 1
 end
 
