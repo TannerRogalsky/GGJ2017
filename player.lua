@@ -73,15 +73,17 @@ function Player:update(dt)
   for _,attacker in ipairs(self.attackers) do
     local dx = self.joystick:getGamepadAxis("leftx")
     local dy = self.joystick:getGamepadAxis("lefty")
+    if math.abs(dx) < 0.2 then dx = 0 end
+    if math.abs(dy) < 0.2 then dy = 0 end
     local phi = math.atan2(dy, dx)
 
     local dx, dy = dx * Player.SPEED, dy * Player.SPEED
 
-    attacker.rotation = phi
+    if dx ~= 0 or dy ~= 0 then attacker.rotation = phi end
     attacker:setLinearVelocity(dx, dy)
 
     for _,defender in ipairs(self.defenders) do
-      defender.rotation = phi + math.pi
+      if dx ~= 0 or dy ~= 0 then defender.rotation = phi + math.pi end
       defender:setLinearVelocity(-dx, -dy)
     end
   end
