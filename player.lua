@@ -1,9 +1,9 @@
 local Player = class('Player', Base)
 Player.static.SPEED = 200
+Player.static.RADIUS = 20
+local radius = Player.RADIUS
 
 local getUVs = require('getUVs')
-
-local radius = 20
 
 local function physicsCharacter(char)
   char.body = love.physics.newBody(game.world, char.x, char.y, 'dynamic')
@@ -33,26 +33,15 @@ local function physicsCharacter(char)
   return char
 end
 
-function Player:initialize()
+function Player:initialize(joystick, mesh, x1, y1, x2, y2)
   Base.initialize(self)
 
-  self.joystick = love.joystick.getJoysticks()[1]
+  self.joystick = joystick
+  self.mesh = mesh
 
-  do
-    local sprite_name = 'robot1_gun'
-    local sprites = require('images.sprites')
-    local ua, va, ub, vb = getUVs(sprites, sprite_name)
-    self.mesh = g.newMesh({
-      {-radius, -radius, ua, va},
-      {-radius, radius, ua, vb},
-      {radius, radius, ub, vb},
-      {radius, -radius, ub, va},
-    }, 'fan', 'static')
-    self.mesh:setTexture(sprites.texture)
-  end
-
-  local ax, ay = game.map:gridToPixel(1, 1)
-  local dx, dy = game.map:gridToPixel(game.map.width, game.map.height)
+  local ax, ay = game.map:gridToPixel(x1, y1)
+  local dx, dy = game.map:gridToPixel(x2, y2)
+  local w, h = push:getWidth() / game.map.width, push:getHeight() / game.map.height
   self.attackers = {
     physicsCharacter({
       x = ax,

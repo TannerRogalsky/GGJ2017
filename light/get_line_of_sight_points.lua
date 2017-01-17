@@ -36,12 +36,6 @@ local function rayCastToPoint(hits, world, x1, y1, x2, y2, ...)
     local hit = rayCastClosest(world, x1, y1, x2, y2)
     if hit then
       table.insert(hits, {hit.x - x1, hit.y - y1})
-      -- local x3, y3 = rotate(0.001, x2, y2, x1, y1)
-      -- hit = rayCastClosest(world, x1, y1, x3, y3)
-      -- if hit then table.insert(hits, {hit.x - x1, hit.y - y1}) end
-      -- x3, y3 = rotate(-0.001, x2, y2, x1, y1)
-      -- hit = rayCastClosest(world, x1, y1, x3, y3)
-      -- if hit then table.insert(hits, {hit.x - x1, hit.y - y1}) end
     end
     rayCastToPoint(hits, world, x1, y1, ...)
   end
@@ -62,4 +56,40 @@ local function getLineOfSightPoints(x1, y1)
   return hits
 end
 
-return getLineOfSightPoints
+local function rayCastToPointSlow(hits, world, x1, y1, x2, y2, ...)
+  if x2 and y2 then
+    local hit = rayCastClosest(world, x1, y1, x2, y2)
+    if hit then
+      table.insert(hits, {hit.x - x1, hit.y - y1})
+
+      -- expensive. comment out if necessary
+      local x3, y3 = rotate(0.001, x2, y2, x1, y1)
+      hit = rayCastClosest(world, x1, y1, x3, y3)
+      if hit then table.insert(hits, {hit.x - x1, hit.y - y1}) end
+      x3, y3 = rotate(-0.001, x2, y2, x1, y1)
+      hit = rayCastClosest(world, x1, y1, x3, y3)
+      if hit then table.insert(hits, {hit.x - x1, hit.y - y1}) end
+    end
+    rayCastToPointSlow(hits, world, x1, y1, ...)
+  end
+end
+
+local function getLineOfSightPointsSlow(x1, y1)
+  -- local MAX_DIST = 200
+  local world = game.world
+  local body = game.map.body
+  local hits = {}
+  for _,fixture in ipairs(body:getFixtureList()) do
+    local shape = fixture:getShape()
+    rayCastToPointSlow(hits, world, x1, y1, shape:getPoints())
+  end
+  table.sort(hits, getIsLess)
+  table.insert(hits, {hits[1][1], hits[1][2]})
+  table.insert(hits, 1, {0, 0})
+  return hits
+end
+
+return {
+  fast = getLineOfSightPoints,
+  slow = getLineOfSightPointsSlow
+}

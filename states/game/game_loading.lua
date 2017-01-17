@@ -36,8 +36,13 @@ function Loading:enteredState()
   self.loader.start(function()
     -- loader finished callback
     -- initialize game stuff here
+    self.sprites = require('images.sprites')
 
-    self:gotoState("Main")
+    if self.debug then
+      self:gotoState("QuickStart")
+    else
+      self:gotoState("Menu")
+    end
   end)
 
   local hexFormatStringPart = '%X '

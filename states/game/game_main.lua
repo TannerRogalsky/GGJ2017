@@ -1,7 +1,7 @@
 local Main = Game:addState('Main')
 local printGrid = require('map.print_grid')
 local symmetricalize = require('map.symmetricalize')
-local getLineOfSightPoints = require('light.get_line_of_sight_points')
+local raycasters = require('light.get_line_of_sight_points')
 local buildLightOverlay = require('light.build_light_overlay')
 
 local function physicsDebugDraw()
@@ -28,7 +28,6 @@ end
 function Main:enteredState()
   local Camera = require("lib/camera")
   self.camera = Camera:new()
-  self.sprites = require('images.sprites')
 
   self.world = love.physics.newWorld(0, 0)
 
@@ -39,11 +38,33 @@ function Main:enteredState()
   grid = symmetricalize(grid, 'both')
   self.map = Map:new(grid)
 
-  self.players = {
-    Player:new()
-  }
+  self.static_lights = {}
+  for i=1,3 do
+    local x, y = self.map:gridToPixel(love.math.random(width * 2), love.math.random(height * 2))
+    table.insert(self.static_lights, {
+      x = x,
+      y = y,
+      mesh = g.newMesh(raycasters.slow(x, y), 'fan', 'static')
+    })
+  end
 
-  self.light_overlay = g.newCanvas()
+  do -- DEAR GOD
+    local selection = self.players
+    self.players = {}
+    for i=1,2 do
+      local field1 = self.player_selection_fields[i]
+      local selector1 = selection[field1]
+      local x1, y1 = field1.gx * (width * 2 - 1) + 1, field1.gy * (height * 2 - 1) + 1
+      local field2 = self.player_selection_fields[i + 2]
+      local selector2 = selection[field2]
+      local x2, y2 = field2.gx * (width * 2 - 1) + 1, field2.gy * (height * 2 - 1) + 1
+      self.players[i] = Player:new(selector1.joystick, selector1.mesh, x1, y1, x2, y2)
+    end
+  end
+
+  self.light_overlay = g.newCanvas(g.getWidth(), g.getHeight(), 'normal')
+  self.player_light_falloff_shader = g.newShader('shaders/player_light_falloff.glsl')
+  self.player_light_falloff_shader:send('falloff_distance', 250)
 
   g.setFont(self.preloaded_fonts["04b03_16"])
 end
@@ -66,8 +87,20 @@ function Main:draw()
   g.push('all')
   g.setCanvas(self.light_overlay)
   g.clear(0, 0, 0, 255 * 0.6)
-  buildLightOverlay(self.players[1].attackers[1].x, self.players[1].attackers[1].y)
-  buildLightOverlay(self.players[1].defenders[1].x, self.players[1].defenders[1].y)
+  g.setShader(self.player_light_falloff_shader)
+  g.setBlendMode('multiply')
+  g.setColor(255, 255, 255, 255 * 0.25)
+  for i,player in ipairs(self.players) do
+    for _,attacker in ipairs(player.attackers) do
+      buildLightOverlay(attacker.x, attacker.y)
+    end
+    for _,defender in ipairs(player.defenders) do
+      buildLightOverlay(defender.x, defender.y)
+    end
+  end
+  for _,static_light in ipairs(self.static_lights) do
+    g.draw(static_light.mesh, static_light.x, static_light.y)
+  end
   g.pop()
 
   for i,player in ipairs(self.players) do

@@ -11,7 +11,7 @@ function love.load(args)
   local gameWidth, gameHeight = love.graphics.getDimensions()
   -- local windowWidth, windowHeight = love.window.getDesktopDimensions()
   local windowWidth, windowHeight = 1920, 1080
-  -- local windowWidth, windowHeight = gameWidth, gameHeight
+  local windowWidth, windowHeight = gameWidth, gameHeight
 
   g.setDefaultFilter('nearest', 'nearest')
   push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {
