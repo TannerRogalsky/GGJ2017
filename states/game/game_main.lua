@@ -5,24 +5,39 @@ local raycasters = require('light.get_line_of_sight_points')
 local buildLightOverlay = require('light.build_light_overlay')
 
 local function physicsDebugDraw()
+  g.push('all')
   for _,body in ipairs(game.world:getBodyList()) do
-    local x, y = body:getPosition()
-    for _,fixture in ipairs(body:getFixtureList()) do
-      local shape = fixture:getShape()
-      local shapeType = shape:getType()
+    if body:isActive() then
+      local x, y = body:getPosition()
       g.push()
       g.translate(x, y)
-      if shapeType == 'circle' then
-        local x, y = shape:getPoint()
-        g.circle('fill', x, y, shape:getRadius())
-      elseif shapeType == 'edge' then
-        g.line(shape:getPoints())
-      elseif shapeType == 'polygon' then
-        g.polygon('line', shape:getPoints())
+      g.rotate(body:getAngle())
+      g.setColor(255, 255, 255)
+      for _,fixture in ipairs(body:getFixtureList()) do
+        local shape = fixture:getShape()
+        local shapeType = shape:getType()
+        if shapeType == 'circle' then
+          local x, y = shape:getPoint()
+          local radius = shape:getRadius()
+          g.circle('line', x, y, radius)
+          g.line(x, y, x + radius, y)
+        elseif shapeType == 'edge' then
+          g.line(shape:getPoints())
+        elseif shapeType == 'polygon' then
+          g.polygon('line', shape:getPoints())
+        end
       end
       g.pop()
+
+      g.setColor(0, 0, 255)
+      for _,joint in ipairs(body:getJointList()) do
+        local x1, y1, x2, y2 = joint:getAnchors()
+        g.circle('fill', x1, y1, 3)
+        g.circle('fill', x2, y2, 3)
+      end
     end
   end
+  g.pop()
 end
 
 function Main:enteredState()
@@ -82,7 +97,7 @@ function Main:draw()
 
   self.map:draw()
 
-  -- physicsDebugDraw()
+  physicsDebugDraw()
 
   g.push('all')
   g.setCanvas(self.light_overlay)
@@ -127,7 +142,7 @@ end
 
 function Main:keypressed(key, scancode, isrepeat)
   if key == 'r' then
-    self:gotoState('Main')
+    self:gotoState('QuickStart')
   end
 end
 
@@ -135,9 +150,19 @@ function Main:keyreleased(key, scancode)
 end
 
 function Main:gamepadpressed(joystick, button)
+  for i,player in ipairs(self.players) do
+    if player.joystick == joystick then
+      player:gamepadpressed(button)
+    end
+  end
 end
 
 function Main:gamepadreleased(joystick, button)
+  for i,player in ipairs(self.players) do
+    if player.joystick == joystick then
+      player:gamepadreleased(button)
+    end
+  end
 end
 
 function Main:focus(has_focus)

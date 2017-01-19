@@ -5,6 +5,8 @@ end
 local num_hits = 0
 
 local function worldRayCastCallback(fixture, x, y, xn, yn, fraction)
+  if fixture:isSensor() then return 1 end
+
   num_hits = num_hits + 1
   ray_hits[num_hits].x = x
   ray_hits[num_hits].y = y
