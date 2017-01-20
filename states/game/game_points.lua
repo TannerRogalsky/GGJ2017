@@ -1,6 +1,11 @@
 local Points = Game:addState('Points')
 
 local function getIsLess(a, b)
+  if a[1] == 0 and a[2] == 0 then
+    return true
+  elseif b[1] == 0 and b[2] == 0 then
+    return false
+  end
   if a[1] >= 0 and b[1] < 0 then return true end
   if a[1] < 0 and b[1] >= 0 then return false end
   if a[1] == 0 and b[1] == 0 then
@@ -21,16 +26,17 @@ local function getIsLess(a, b)
 end
 
 function Points:enteredState()
-  center_x, center_y = 500, 500
+  center_x, center_y = push:getWidth() / 2, push:getHeight() / 2
   num_points = 20
-  points = {}
+  points = {{0, 0}}
   love.math.setRandomSeed(0)
   for i=1,num_points do
     table.insert(points, {love.math.random(300) - 150, love.math.random(300) - 150})
   end
 
   table.sort(points, getIsLess)
-  table.insert(points, 1, {0, 0})
+  print(unpack(points[1]))
+  table.insert(points, {points[2][1], points[2][2]})
 
   mesh = g.newMesh(points, 'fan', 'static')
 end

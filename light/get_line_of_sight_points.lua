@@ -1,4 +1,6 @@
 local rayCastClosest = require('light.raycast_closest')
+local shellsort = require('light.shellsort')
+local num_hits = 0
 
 local function len(x, y)
   return x * x + y * y
@@ -12,6 +14,11 @@ local function rotate(phi, x,y, ox,oy)
 end
 
 local function getIsLess(a, b)
+  if a[1] == 0 and a[2] == 0 then
+    return true
+  elseif b[1] == 0 and b[2] == 0 then
+    return false
+  end
   if a[1] >= 0 and b[1] < 0 then return true end
   if a[1] < 0 and b[1] >= 0 then return false end
   if a[1] == 0 and b[1] == 0 then
@@ -35,25 +42,27 @@ local function rayCastToPoint(hits, world, x1, y1, x2, y2, ...)
   if x2 and y2 then
     local hit = rayCastClosest(world, x1, y1, x2, y2)
     if hit then
-      table.insert(hits, {hit.x - x1, hit.y - y1})
+      num_hits = num_hits + 1
+      hits[num_hits][1], hits[num_hits][2] = hit.x - x1, hit.y - y1
     end
     rayCastToPoint(hits, world, x1, y1, ...)
   end
 end
 
-local function getLineOfSightPoints(x1, y1)
+local function getLineOfSightPoints(hits, x1, y1)
   -- local MAX_DIST = 200
   local world = game.world
   local body = game.map.body
-  local hits = {}
+  num_hits = 1
+  hits[1][1], hits[1][2] = 0, 0
   for _,fixture in ipairs(body:getFixtureList()) do
     local shape = fixture:getShape()
     rayCastToPoint(hits, world, x1, y1, shape:getPoints())
   end
-  table.sort(hits, getIsLess)
-  table.insert(hits, {hits[1][1], hits[1][2]})
-  table.insert(hits, 1, {0, 0})
-  return hits
+  shellsort(hits, getIsLess, num_hits)
+  num_hits = num_hits + 1
+  hits[num_hits][1], hits[num_hits][2] = hits[2][1], hits[2][2]
+  return num_hits
 end
 
 local function rayCastToPointSlow(hits, world, x1, y1, x2, y2, ...)
