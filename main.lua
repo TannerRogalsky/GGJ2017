@@ -43,6 +43,7 @@ function love.keypressed(key, scancode, isrepeat)
   game:keypressed(key, scancode, isrepeat)
 
   if key == "escape" then
+    game:gotoState()
     love.event.push("quit")
   end
 end
