@@ -37,7 +37,7 @@ growingTree = require('map.growing_tree')
 Base = require("base")
 Game = require("game")
 Map = require("Map")
-Player = require("player")
+Player = require("player.player")
 
 Direction = require("direction")
 
