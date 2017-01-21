@@ -8,6 +8,14 @@ local physics_callbacks = require('physics_callbacks')
 local getNextSpawnPoint = require('get_next_spawn_point')
 local NewAttackerPowerup = require('powerups.new_attacker_powerup')
 local healthBarStencil = require('health_bar_stencil')
+local LIGHT_FALLOFF_DISTANCE = 250
+
+local defenders_light_mesh = g.newMesh({
+  {-LIGHT_FALLOFF_DISTANCE, -LIGHT_FALLOFF_DISTANCE},
+  {-LIGHT_FALLOFF_DISTANCE, LIGHT_FALLOFF_DISTANCE},
+  {LIGHT_FALLOFF_DISTANCE, LIGHT_FALLOFF_DISTANCE},
+  {LIGHT_FALLOFF_DISTANCE, -LIGHT_FALLOFF_DISTANCE}
+}, 'fan', 'static')
 
 function Main:enteredState()
   local Camera = require('lib/camera')
@@ -59,16 +67,14 @@ function Main:enteredState()
     end
   end
 
-  -- print(self.players[1].defenders[1].fixture:getMask())
-
-  for i=1,10 do
+  for i=1,5 do
     local x, y = self.map:gridToPixel(getNextSpawnPoint(self))
     self.powerups[i] = NewAttackerPowerup:new(x, y, 3)
   end
 
   self.light_overlay = g.newCanvas(g.getWidth(), g.getHeight(), 'normal')
   self.player_light_falloff_shader = g.newShader('shaders/player_light_falloff.glsl')
-  self.player_light_falloff_shader:send('falloff_distance', 250)
+  self.player_light_falloff_shader:send('falloff_distance', LIGHT_FALLOFF_DISTANCE)
 
   g.setFont(self.preloaded_fonts['04b03_16'])
 end
@@ -108,7 +114,7 @@ function Main:draw()
     powerup:draw()
   end
 
-  physicsDebugDraw()
+  -- physicsDebugDraw()
 
   for i,player in ipairs(self.players) do
     player:draw()
@@ -124,9 +130,9 @@ function Main:draw()
     for _,attacker in ipairs(player.attackers) do
       buildLightOverlay(attacker.x, attacker.y)
     end
-    -- for _,defender in ipairs(player.defenders) do
-    --   buildLightOverlay(defender.x, defender.y)
-    -- end
+    for _,defender in ipairs(player.defenders) do
+      g.draw(defenders_light_mesh, defender.x, defender.y)
+    end
   end
   for _,static_light in ipairs(self.static_lights) do
     g.draw(static_light.mesh, static_light.x, static_light.y)

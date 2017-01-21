@@ -3,6 +3,8 @@ local Sword = class('Sword', Base)
 function Sword:initialize(body, fixture, joint)
   Base.initialize(self)
 
+  self.angle = 0
+
   self.body = body
   self.fixture = fixture
   self.fixture:setUserData(self)

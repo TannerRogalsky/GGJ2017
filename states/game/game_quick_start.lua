@@ -3,8 +3,8 @@ local getUVs = require('getUVs')
 
 local quads = {
   attackers = {
-    'robot1_gun',
-    'soldier1_gun'
+    'player_1_body',
+    'player_2_body'
   },
   defenders = {
     'player_1_life',

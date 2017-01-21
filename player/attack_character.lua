@@ -28,7 +28,8 @@ end
 
 function AttackCharacter:update(dt)
   local sword = self.sword
-  local delta = sword.body:getAngle() - self.body:getAngle()
+  sword.angle = sword.body:getAngle()
+  local delta = sword.angle - self.body:getAngle()
   if delta > math.pi / 2 then
     local body = sword.body
     local joint = sword.joint

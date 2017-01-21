@@ -19,8 +19,8 @@ end
 
 local quads = {
   attackers = {
-    'robot1_gun',
-    'soldier1_gun'
+    'player_1_body',
+    'player_2_body'
   },
   defenders = {
     'player_1_life',
@@ -155,7 +155,7 @@ function Menu:draw()
 
   g.setColor(255, 255, 255)
   for i,p in ipairs(self.selectors) do
-    g.draw(p.mesh, p.x, p.y, math.atan2(p.vy, p.vx))
+    g.draw(p.mesh, p.x, p.y, math.atan2(p.vy, p.vx) + math.pi / 2)
   end
 
   g.push('all')

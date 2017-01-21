@@ -26,9 +26,12 @@ function Player:initialize(joystick, attacker_mesh, defender_mesh, x1, y1, x2, y
   self.defenders = {
     DefenseCharacter:new(self, dx, dy, radius, 0, Player.SPEED)
   }
+
+  self.t = 0
 end
 
 function Player:update(dt)
+  self.t = self.t + dt
   for _,attacker in ipairs(self.attackers) do
     attacker:update(dt)
   end
@@ -61,11 +64,17 @@ end
 
 function Player:draw()
   for i,attacker in ipairs(self.attackers) do
-    g.draw(self.attacker_mesh, attacker.x, attacker.y, attacker.rotation)
+    g.draw(self.attacker_mesh, attacker.x, attacker.y, attacker.rotation + math.pi / 2)
+
+    do
+      local index = math.abs(self.group_index)
+      local quad = game.sprites.quads['player_' .. index .. '_sword']
+      g.draw(game.sprites.texture, quad, attacker.x, attacker.y, attacker.sword.angle)
+    end
   end
 
   for _,defender in ipairs(self.defenders) do
-    g.draw(self.defender_mesh, defender.x, defender.y, defender.rotation)
+    g.draw(self.defender_mesh, defender.x, defender.y, self.t * 1.5)
   end
 end
 

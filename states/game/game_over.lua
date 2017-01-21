@@ -28,7 +28,7 @@ function Over:update(dt)
   self.t = self.t + dt
   local ox, oy = push:getWidth() / 2, push:getHeight() / 2
   local ex1, ey1 = math.cos(self.t) * 200 + ox, math.sin(self.t) * 100 + oy
-  local ex2, ey2 = math.cos(self.t + math.pi) * 200 + ox, math.sin(self.t + math.pi) * 100 + oy
+  local ex2, ey2 = math.cos(self.t - math.pi) * 200 + ox, math.sin(self.t - math.pi) * 100 + oy
 
   local attacker = self.winner.attackers[1]
   local defender = self.winner.defenders[1]
