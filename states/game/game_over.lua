@@ -1,4 +1,5 @@
 local Over = Game:addState('Over')
+local healthBarStencil = require('health_bar_stencil')
 local MOVE_TO_ELLIPSE_TIME = 4
 
 local function lerp(t, v0, v1, d)
@@ -63,15 +64,15 @@ function Over:draw()
   end
 
   g.push('all')
-  g.setColor(0, 255, 0, 100)
-  g.setLineWidth(5)
+  love.graphics.stencil(healthBarStencil, 'replace', 1)
+  love.graphics.setStencilTest('greater', 0)
   for i,player in ipairs(self.players) do
-    for i,defender in ipairs(player.defenders) do
-      local radius = defender.radius
-      local health_ratio = defender.health / defender.max_health
-      g.arc('line', 'open', defender.x, defender.y, radius * 2, -math.pi / 2, health_ratio * math.pi * 2 - math.pi / 2, radius * 2)
+    for _,defender in ipairs(player.defenders) do
+      local quad = self.sprites.quads['player_' .. i .. '_life_ring']
+      g.draw(self.sprites.texture, quad, defender.x, defender.y, 0, 2, 2, 32 / 2, 32 / 2)
     end
   end
+  love.graphics.setStencilTest()
   g.pop()
 
   g.setFont(game.preloaded_fonts['04b03_64'])

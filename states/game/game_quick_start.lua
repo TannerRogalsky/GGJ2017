@@ -2,9 +2,29 @@ local QuickStart = Game:addState('QuickStart')
 local getUVs = require('getUVs')
 
 local quads = {
-  'robot1_gun',
-  'soldier1_gun'
+  attackers = {
+    'robot1_gun',
+    'soldier1_gun'
+  },
+  defenders = {
+    'player_1_life',
+    'player_2_life'
+  }
 }
+
+local function getMesh(sprite_name)
+  local sprites = game.sprites
+  local ua, va, ub, vb = getUVs(sprites, sprite_name)
+  local radius = Player.RADIUS
+  local mesh = g.newMesh({
+    {-radius, -radius, ua, va},
+    {-radius, radius, ua, vb},
+    {radius, radius, ub, vb},
+    {radius, -radius, ub, va},
+  }, 'fan', 'static')
+  mesh:setTexture(sprites.texture)
+  return mesh
+end
 
 function QuickStart:enteredState()
   self.joysticks = love.joystick.getJoysticks()
@@ -14,29 +34,18 @@ function QuickStart:enteredState()
   self.selectors = {}
   for i,v in ipairs(self.joysticks) do
     local x, y = w / 2, h / 2
-    local sprite_name = quads[i]
-    local sprites = game.sprites
-    local ua, va, ub, vb = getUVs(sprites, sprite_name)
-    local radius = Player.RADIUS
-    local mesh = g.newMesh({
-      {-radius, -radius, ua, va},
-      {-radius, radius, ua, vb},
-      {radius, radius, ub, vb},
-      {radius, -radius, ub, va},
-    }, 'fan', 'static')
-    mesh:setTexture(sprites.texture)
     self.selectors[i] = {
       start_x = x, start_y = y,
       x = x, y = y,
       vx = 0, vy = 0,
-      mesh = mesh,
+      mesh = getMesh(quads.attackers[i]),
       joystick = self.joysticks[i]
     }
     self.selectors[i + 2] = {
       start_x = x, start_y = y,
       x = x, y = y,
       vx = 0, vy = 0,
-      mesh = mesh,
+      mesh = getMesh(quads.defenders[i]),
       joystick = self.joysticks[i]
     }
   end

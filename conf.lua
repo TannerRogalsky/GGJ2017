@@ -50,6 +50,6 @@ function love.conf(t)
     homepage = nil,
     identifier = t.identity,
     releaseDirectory = '../love2d_builds',
-    excludeFileList = { 'docs/', '%.rockspec' }
+    excludeFileList = { 'docs/', '%.rockspec', 'source_images/' }
   }
 end

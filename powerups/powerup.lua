@@ -54,7 +54,13 @@ function Powerup:draw()
 end
 
 function Powerup:trigger(triggerer)
-  print('powerup', triggerer)
+  for i,powerup in ipairs(game.powerups) do
+    if powerup == self then
+      table.remove(game.powerups, i)
+      self.body:destroy()
+      break
+    end
+  end
 end
 
 function Powerup:begin_contact(other)

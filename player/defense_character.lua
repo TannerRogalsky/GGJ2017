@@ -9,6 +9,8 @@ function DefenseCharacter:initialize(...)
   self.max_health = 10
   self.health = self.max_health
   self.original_speed = self.speed
+
+  self.fixture:setGroupIndex(self.owner.group_index)
 end
 
 function DefenseCharacter:begin_contact(other)

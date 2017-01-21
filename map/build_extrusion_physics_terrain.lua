@@ -51,21 +51,41 @@ local function buildExtrusionPhysicsTerrain(world, grid, size_x, size_y)
         local ew, eh = w, size_y
         local shape = newRectangleShape(px + ew / 2, py + eh / 2 + h - size_y, ew + size_x * 2, eh)
         local fixture = newFixture(body, shape, 1)
+        if y == height then
+          fixture:setCategory(1)
+        else
+          fixture:setCategory(2)
+        end
       end
       if bit.band(grid[y][x], N) == 0 then
         local ew, eh = w, size_y
         local shape = newRectangleShape(px + ew / 2, py + eh / 2, ew + size_x * 2, eh)
         local fixture = newFixture(body, shape, 1)
+        if y == 1 then
+          fixture:setCategory(1)
+        else
+          fixture:setCategory(2)
+        end
       end
       if bit.band(grid[y][x], W) == 0 then
         local ew, eh = size_x, h
         local shape = newRectangleShape(px + ew / 2, py + eh / 2, ew, eh + size_y * 2)
         local fixture = newFixture(body, shape, 1)
+        if x == 1 then
+          fixture:setCategory(1)
+        else
+          fixture:setCategory(2)
+        end
       end
       if bit.band(grid[y][x], E) == 0 then
         local ew, eh = size_x, h
         local shape = newRectangleShape(px + ew / 2 + w - size_x, py + eh / 2, ew, eh + size_y * 2)
         local fixture = newFixture(body, shape, 1)
+        if x == width then
+          fixture:setCategory(1)
+        else
+          fixture:setCategory(2)
+        end
       end
     end
   end

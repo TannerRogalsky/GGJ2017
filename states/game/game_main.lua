@@ -6,9 +6,11 @@ local buildLightOverlay = require('light.build_light_overlay')
 local physicsDebugDraw = require('physics_debug_draw')
 local physics_callbacks = require('physics_callbacks')
 local getNextSpawnPoint = require('get_next_spawn_point')
+local NewAttackerPowerup = require('powerups.new_attacker_powerup')
+local healthBarStencil = require('health_bar_stencil')
 
 function Main:enteredState()
-  local Camera = require("lib/camera")
+  local Camera = require('lib/camera')
   self.camera = Camera:new()
 
   self.t = 0
@@ -17,7 +19,7 @@ function Main:enteredState()
 
   local width, height = math.floor(16 * 0.4), math.floor(9 * 0.4)
   local seed = math.floor(love.math.random(math.pow(2, 53)))
-  print(string.format("Seed: %u", seed))
+  print(string.format('Seed: %u', seed))
   local grid = growingTree(width, height, {random = 1, newest = 1}, seed)
   grid = symmetricalize(grid, 'both')
   self.map = Map:new(grid)
@@ -52,22 +54,23 @@ function Main:enteredState()
       local field2 = self.player_selection_fields[i + 2]
       local selector2 = selection[field2]
       local x2, y2 = field2.gx * (width * 2 - 1) + 1, field2.gy * (height * 2 - 1) + 1
-      self.players[i] = Player:new(selector1.joystick, selector1.mesh, x1, y1, x2, y2)
-      self.players[i].attackers[1].sword.fixture:setGroupIndex(-i)
-      self.players[i].defenders[1].fixture:setGroupIndex(-i)
+      self.players[i] = Player:new(selector1.joystick, selector1.mesh, selector2.mesh, x1, y1, x2, y2, -i)
+      self.players[i].defenders[1].fixture:setMask(2)
     end
   end
 
+  -- print(self.players[1].defenders[1].fixture:getMask())
+
   for i=1,10 do
     local x, y = self.map:gridToPixel(getNextSpawnPoint(self))
-    self.powerups[i] = Powerup:new(x, y, 3)
+    self.powerups[i] = NewAttackerPowerup:new(x, y, 3)
   end
 
   self.light_overlay = g.newCanvas(g.getWidth(), g.getHeight(), 'normal')
   self.player_light_falloff_shader = g.newShader('shaders/player_light_falloff.glsl')
   self.player_light_falloff_shader:send('falloff_distance', 250)
 
-  g.setFont(self.preloaded_fonts["04b03_16"])
+  g.setFont(self.preloaded_fonts['04b03_16'])
 end
 
 function Main:update(dt)
@@ -121,9 +124,9 @@ function Main:draw()
     for _,attacker in ipairs(player.attackers) do
       buildLightOverlay(attacker.x, attacker.y)
     end
-    for _,defender in ipairs(player.defenders) do
-      buildLightOverlay(defender.x, defender.y)
-    end
+    -- for _,defender in ipairs(player.defenders) do
+    --   buildLightOverlay(defender.x, defender.y)
+    -- end
   end
   for _,static_light in ipairs(self.static_lights) do
     g.draw(static_light.mesh, static_light.x, static_light.y)
@@ -132,15 +135,15 @@ function Main:draw()
   g.draw(self.light_overlay)
 
   g.push('all')
-  g.setColor(0, 255, 0, 100)
-  g.setLineWidth(5)
+  love.graphics.stencil(healthBarStencil, 'replace', 1)
+  love.graphics.setStencilTest('greater', 0)
   for i,player in ipairs(self.players) do
-    for i,defender in ipairs(player.defenders) do
-      local radius = defender.radius
-      local health_ratio = defender.health / defender.max_health
-      g.arc('line', 'open', defender.x, defender.y, radius * 2, -math.pi / 2, health_ratio * math.pi * 2 - math.pi / 2, radius * 2)
+    for _,defender in ipairs(player.defenders) do
+      local quad = self.sprites.quads['player_' .. i .. '_life_ring']
+      g.draw(self.sprites.texture, quad, defender.x, defender.y, 0, 2, 2, 32 / 2, 32 / 2)
     end
   end
+  love.graphics.setStencilTest()
   g.pop()
 
   self.camera:unset()

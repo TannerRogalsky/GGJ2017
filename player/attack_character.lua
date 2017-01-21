@@ -15,6 +15,7 @@ function AttackCharacter:initialize(...)
   joint:setLimits(-math.pi / 2, -math.pi / 2)
   joint:setLimitsEnabled(true)
   self.sword = Sword:new(body, fixture, joint)
+  self.sword.fixture:setGroupIndex(self.owner.group_index)
 
   local oldSetAngle = self.setAngle
   function self:setAngle(phi)

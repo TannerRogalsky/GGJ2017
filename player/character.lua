@@ -1,14 +1,16 @@
 local Character = class('Character', Base)
 
-function Character:initialize(x, y, radius, rotation, speed)
+function Character:initialize(owner, x, y, radius, rotation, speed)
   Base.initialize(self)
 
+  assert(owner:isInstanceOf(Player))
   assert(is_num(x))
   assert(is_num(y))
   assert(is_num(radius))
   assert(is_num(rotation))
   assert(is_num(speed))
 
+  self.owner = owner
   self.x, self.y = x, y
   self.radius = radius
   self.rotation = rotation

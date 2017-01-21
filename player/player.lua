@@ -7,20 +7,24 @@ local AttackCharacter = require('player.attack_character')
 local DefenseCharacter = require('player.defense_character')
 local getUVs = require('getUVs')
 
-function Player:initialize(joystick, mesh, x1, y1, x2, y2)
+function Player:initialize(joystick, attacker_mesh, defender_mesh, x1, y1, x2, y2, group_index)
   Base.initialize(self)
 
+  assert(is_num(group_index))
+
   self.joystick = joystick
-  self.mesh = mesh
+  self.attacker_mesh = attacker_mesh
+  self.defender_mesh = defender_mesh
+  self.group_index = group_index
 
   local ax, ay = game.map:gridToPixel(x1, y1)
   local dx, dy = game.map:gridToPixel(x2, y2)
   local w, h = push:getWidth() / game.map.width, push:getHeight() / game.map.height
   self.attackers = {
-    AttackCharacter:new(ax, ay, radius, 0, Player.SPEED)
+    AttackCharacter:new(self, ax, ay, radius, 0, Player.SPEED)
   }
   self.defenders = {
-    DefenseCharacter:new(dx, dy, radius, 0, Player.SPEED)
+    DefenseCharacter:new(self, dx, dy, radius, 0, Player.SPEED)
   }
 end
 
@@ -57,11 +61,11 @@ end
 
 function Player:draw()
   for i,attacker in ipairs(self.attackers) do
-    g.draw(self.mesh, attacker.x, attacker.y, attacker.rotation)
+    g.draw(self.attacker_mesh, attacker.x, attacker.y, attacker.rotation)
   end
 
   for _,defender in ipairs(self.defenders) do
-    g.draw(self.mesh, defender.x, defender.y, defender.rotation)
+    g.draw(self.defender_mesh, defender.x, defender.y, defender.rotation)
   end
 end
 
