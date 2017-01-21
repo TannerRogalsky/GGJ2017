@@ -27,15 +27,15 @@ function Powerup:initialize(x, y, time_to_trigger)
     {w/2, -h/2, 1, 0},
   }, 'fan', 'static')
 
-  self.timers = {}
+  self.timer = nil
 end
 
 local t = 0
 function Powerup:update(dt)
   t = t + dt
   powerup_shader:send('time', t)
-  for triggerer,timer in pairs(self.timers) do
-    timer:update(dt)
+  if self.timer then
+    self.timer:update(dt)
   end
 end
 
@@ -43,15 +43,14 @@ function Powerup:draw()
   g.push('all')
   g.setColor(217, 17, 197)
   g.setShader(powerup_shader)
-  g.translate(self.body:getPosition())
+  g.translate(self.x, self.y)
   g.draw(self.mesh)
-  local other, timer = next(self.timers)
-  if timer then
+  if self.timer then
     g.setShader()
     g.setColor(0, 0, 0)
     g.setFont(game.preloaded_fonts['04b03_32'])
     local w, h = push:getWidth() / game.map.width * 0.5, push:getHeight() / game.map.height * 0.5
-    g.printf(math.round(timer.time - timer.running, 1), -w / 2, -32 / 2, w, 'center')
+    g.printf(math.round(self.timer.time - self.timer.running, 1), -w / 2, -32 / 2, w, 'center')
   end
   g.pop()
 end
@@ -65,14 +64,16 @@ function Powerup:begin_contact(other)
     if self.time_to_trigger == 0 then
       self:trigger(other)
     elseif self.time_to_trigger > 0 then
-      self.timers[other] = cron.after(self.time_to_trigger, self.trigger, self, other)
+      self.timer = cron.after(self.time_to_trigger, self.trigger, self, other)
     end
   end
 end
 
 function Powerup:end_contact(other)
   if other and other:isInstanceOf(DefenseCharacter) then
-    self.timers[other] = nil
+    if self.timer and self.timer.args[2] == other then
+      self.timer = nil
+    end
   end
 end
 
