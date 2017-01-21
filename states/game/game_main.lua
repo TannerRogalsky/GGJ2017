@@ -5,11 +5,13 @@ local raycasters = require('light.get_line_of_sight_points')
 local buildLightOverlay = require('light.build_light_overlay')
 local physicsDebugDraw = require('physics_debug_draw')
 local physics_callbacks = require('physics_callbacks')
+local getNextSpawnPoint = require('get_next_spawn_point')
 
 function Main:enteredState()
   local Camera = require("lib/camera")
   self.camera = Camera:new()
 
+  self.t = 0
   self.world = love.physics.newWorld(0, 0)
   self.world:setCallbacks(unpack(physics_callbacks))
 
@@ -18,12 +20,21 @@ function Main:enteredState()
   print(string.format("Seed: %u", seed))
   local grid = growingTree(width, height, {random = 1, newest = 1}, seed)
   grid = symmetricalize(grid, 'both')
-  -- grid = growingTree(width * 2, height * 2, {random = 1, newest = 1}, seed)
   self.map = Map:new(grid)
 
+  self.powerups = {}
   self.static_lights = {}
+  do
+    local x, y = self.map:gridToPixel(width + 0.5, height + 0.5)
+    table.insert(self.static_lights, {
+      x = x,
+      y = y,
+      mesh = g.newMesh(raycasters.slow(x, y), 'fan', 'static')
+    })
+  end
   for i=1,3 do
-    local x, y = self.map:gridToPixel(love.math.random(width * 2), love.math.random(height * 2))
+    local x, y = self.map:gridToPixel(getNextSpawnPoint(self))
+    -- print(x, y)
     table.insert(self.static_lights, {
       x = x,
       y = y,
@@ -47,9 +58,8 @@ function Main:enteredState()
     end
   end
 
-  self.powerups = {}
-  for i=1,1 do
-    local x, y = self.map:gridToPixel(width * 2 - 1, height * 2)
+  for i=1,10 do
+    local x, y = self.map:gridToPixel(getNextSpawnPoint(self))
     self.powerups[i] = Powerup:new(x, y, 3)
   end
 
@@ -61,6 +71,8 @@ function Main:enteredState()
 end
 
 function Main:update(dt)
+  self.t = self.t + dt
+  Powerup.powerup_shader:send('time', self.t)
   self.world:update(dt)
   for i,player in ipairs(self.players) do
     player:update(dt)

@@ -2,6 +2,7 @@ local Powerup = class('Powerup', Base)
 local DefenseCharacter = require('player.defense_character')
 
 local powerup_shader = g.newShader('shaders/powerup.glsl')
+Powerup.static.powerup_shader = powerup_shader
 
 function Powerup:initialize(x, y, time_to_trigger)
   Base.initialize(self)
@@ -21,19 +22,16 @@ function Powerup:initialize(x, y, time_to_trigger)
   self.fixture:setUserData(self)
 
   self.mesh = g.newMesh({
-    {-w/2, -h/2, 0, 0},
-    {-w/2, h/2, 0, 1},
-    {w/2, h/2, 1, 1},
-    {w/2, -h/2, 1, 0},
+    {-w, -h, 0, 0},
+    {-w, h, 0, 1},
+    {w, h, 1, 1},
+    {w, -h, 1, 0},
   }, 'fan', 'static')
 
   self.timer = nil
 end
 
-local t = 0
 function Powerup:update(dt)
-  t = t + dt
-  powerup_shader:send('time', t)
   if self.timer then
     self.timer:update(dt)
   end

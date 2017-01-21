@@ -137,12 +137,9 @@ function Map:initialize(grid)
 end
 
 function Map:draw()
-  local width, height = self.width, self.height
-
   g.push('all')
   g.setColor(255, 255, 255)
   g.draw(self.spritebatch)
-
   g.pop()
 end
 
