@@ -99,9 +99,6 @@ function Main:draw()
     player:draw()
   end
 
-  self.camera:unset()
-  push:finish()
-
   g.push('all')
   g.setCanvas(self.light_overlay)
   g.clear(0, 0, 0, 255 * 0.6)
@@ -133,6 +130,9 @@ function Main:draw()
     end
   end
   g.pop()
+
+  self.camera:unset()
+  push:finish()
 
   if self.debug then
     g.setColor(0, 255, 0)
