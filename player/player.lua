@@ -17,10 +17,10 @@ function Player:initialize(joystick, mesh, x1, y1, x2, y2)
   local dx, dy = game.map:gridToPixel(x2, y2)
   local w, h = push:getWidth() / game.map.width, push:getHeight() / game.map.height
   self.attackers = {
-    AttackCharacter:new(ax, ay, radius, 0)
+    AttackCharacter:new(ax, ay, radius, 0, Player.SPEED)
   }
   self.defenders = {
-    DefenseCharacter:new(dx, dy, radius, 0)
+    DefenseCharacter:new(dx, dy, radius, 0, Player.SPEED)
   }
 end
 
@@ -34,16 +34,15 @@ function Player:update(dt)
   if math.abs(dx) < 0.2 then dx = 0 end
   if math.abs(dy) < 0.2 then dy = 0 end
   local phi = math.atan2(dy, dx)
-  local dx, dy = dx * Player.SPEED, dy * Player.SPEED
 
   for _,attacker in ipairs(self.attackers) do
     if dx ~= 0 or dy ~= 0 then attacker:setAngle(phi) end
-    attacker:setLinearVelocity(dx, dy)
+    attacker:setLinearVelocity(dx * attacker.speed, dy * attacker.speed)
   end
 
   for _,defender in ipairs(self.defenders) do
     if dx ~= 0 or dy ~= 0 then defender:setAngle(phi + math.pi) end
-    defender:setLinearVelocity(-dx, -dy)
+    defender:setLinearVelocity(-dx * defender.speed, -dy * defender.speed)
   end
 end
 

@@ -1,21 +1,24 @@
 local Character = class('Character', Base)
 
-function Character:initialize(x, y, radius, rotation)
+function Character:initialize(x, y, radius, rotation, speed)
   Base.initialize(self)
 
   assert(is_num(x))
   assert(is_num(y))
   assert(is_num(radius))
   assert(is_num(rotation))
+  assert(is_num(speed))
 
   self.x, self.y = x, y
   self.radius = radius
   self.rotation = rotation
+  self.speed = speed
 
   self.body = love.physics.newBody(game.world, self.x, self.y, 'dynamic')
   local shape = love.physics.newCircleShape(self.radius)
   self.fixture = love.physics.newFixture(self.body, shape, 1)
   self.body:setFixedRotation(true)
+  self.fixture:setUserData(self)
 end
 
 function Character:setPositionFromBody()

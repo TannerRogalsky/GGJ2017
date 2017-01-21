@@ -69,6 +69,7 @@ function Main:enteredState()
   print(string.format("Seed: %u", seed))
   local grid = growingTree(width, height, {random = 1, newest = 1}, seed)
   grid = symmetricalize(grid, 'both')
+  -- grid = growingTree(width * 2, height * 2, {random = 1, newest = 1}, seed)
   self.map = Map:new(grid)
 
   self.static_lights = {}
@@ -92,6 +93,8 @@ function Main:enteredState()
       local selector2 = selection[field2]
       local x2, y2 = field2.gx * (width * 2 - 1) + 1, field2.gy * (height * 2 - 1) + 1
       self.players[i] = Player:new(selector1.joystick, selector1.mesh, x1, y1, x2, y2)
+      self.players[i].attackers[1].sword.fixture:setGroupIndex(-i)
+      self.players[i].defenders[1].fixture:setGroupIndex(-i)
     end
   end
 
@@ -106,6 +109,18 @@ function Main:update(dt)
   self.world:update(dt)
   for i,player in ipairs(self.players) do
     player:update(dt)
+  end
+
+  for i,player in ipairs(self.players) do
+    for i=#player.defenders,1,-1 do
+      if player.defenders[i].health <= 0 then
+        table.remove(player.defenders, i)
+      end
+    end
+
+    if #player.defenders <= 0 then
+      self:gotoState('Over')
+    end
   end
 end
 
@@ -144,6 +159,18 @@ function Main:draw()
   push:finish()
 
   g.draw(self.light_overlay)
+
+  g.push('all')
+  g.setColor(0, 255, 0, 100)
+  g.setLineWidth(5)
+  for i,player in ipairs(self.players) do
+    for i,defender in ipairs(player.defenders) do
+      local radius = defender.radius
+      local health_ratio = defender.health / defender.max_health
+      g.arc('line', 'open', defender.x, defender.y, radius * 2, -math.pi / 2, health_ratio * math.pi * 2 - math.pi / 2, radius * 2)
+    end
+  end
+  g.pop()
 
   if self.debug then
     g.setColor(0, 255, 0)

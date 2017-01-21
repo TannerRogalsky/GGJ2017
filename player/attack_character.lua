@@ -1,8 +1,10 @@
 local Character = require('player.character')
 local AttackCharacter = class('AttackCharacter', Character)
 
-function AttackCharacter:initialize(x, y, radius, rotation)
-  Character.initialize(self, x, y, radius, rotation)
+local Sword = require('player.sword')
+
+function AttackCharacter:initialize(...)
+  Character.initialize(self, ...)
 
   local body = love.physics.newBody(game.world, self.x, self.y, 'dynamic')
   local shape = love.physics.newRectangleShape(25, 0, 10, 50, math.pi / 2)
@@ -12,11 +14,7 @@ function AttackCharacter:initialize(x, y, radius, rotation)
   local joint = love.physics.newRevoluteJoint(self.body, body, self.x, self.y, self.x, self.y, false, 0)
   joint:setLimits(-math.pi / 2, -math.pi / 2)
   joint:setLimitsEnabled(true)
-  self.sword = {
-    body = body,
-    joint = joint,
-    swinging = false
-  }
+  self.sword = Sword:new(body, fixture, joint)
 
   local oldSetAngle = self.setAngle
   function self:setAngle(phi)
