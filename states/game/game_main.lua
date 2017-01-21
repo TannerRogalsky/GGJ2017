@@ -3,59 +3,8 @@ local printGrid = require('map.print_grid')
 local symmetricalize = require('map.symmetricalize')
 local raycasters = require('light.get_line_of_sight_points')
 local buildLightOverlay = require('light.build_light_overlay')
-
-local function physicsDebugDraw()
-  g.push('all')
-  for _,body in ipairs(game.world:getBodyList()) do
-    if body:isActive() then
-      local x, y = body:getPosition()
-      g.push()
-      g.translate(x, y)
-      g.rotate(body:getAngle())
-      g.setColor(255, 255, 255)
-      for _,fixture in ipairs(body:getFixtureList()) do
-        local shape = fixture:getShape()
-        local shapeType = shape:getType()
-        if shapeType == 'circle' then
-          local x, y = shape:getPoint()
-          local radius = shape:getRadius()
-          g.circle('line', x, y, radius)
-          g.line(x, y, x + radius, y)
-        elseif shapeType == 'edge' then
-          g.line(shape:getPoints())
-        elseif shapeType == 'polygon' then
-          g.polygon('line', shape:getPoints())
-        end
-      end
-      g.pop()
-
-      g.setColor(0, 0, 255)
-      for _,joint in ipairs(body:getJointList()) do
-        local x1, y1, x2, y2 = joint:getAnchors()
-        g.circle('fill', x1, y1, 3)
-        g.circle('fill', x2, y2, 3)
-      end
-    end
-  end
-  g.pop()
-end
-
-local physics_callback_names = {"begin_contact", "end_contact", "presolve", "postsolve"}
-local physics_callbacks = {}
-for _,callback_name in ipairs(physics_callback_names) do
-  local function callback(fixture_a, fixture_b, contact, ...)
-    local object_one, object_two = fixture_a:getUserData(), fixture_b:getUserData()
-    -- print(callback_name, object_one, object_two, ...)
-    local nx, ny = contact:getNormal()
-    if object_one and is_func(object_one[callback_name]) then
-      object_one[callback_name](object_one, object_two, contact, nx, ny, ...)
-    end
-    if object_two and is_func(object_two[callback_name]) then
-      object_two[callback_name](object_two, object_one, contact, -nx, -ny, ...)
-    end
-  end
-  table.insert(physics_callbacks, callback)
-end
+local physicsDebugDraw = require('physics_debug_draw')
+local physics_callbacks = require('physics_callbacks')
 
 function Main:enteredState()
   local Camera = require("lib/camera")
@@ -98,6 +47,12 @@ function Main:enteredState()
     end
   end
 
+  self.powerups = {}
+  for i=1,1 do
+    local x, y = self.map:gridToPixel(width * 2 - 1, height * 2)
+    self.powerups[i] = Powerup:new(x, y, 3)
+  end
+
   self.light_overlay = g.newCanvas(g.getWidth(), g.getHeight(), 'normal')
   self.player_light_falloff_shader = g.newShader('shaders/player_light_falloff.glsl')
   self.player_light_falloff_shader:send('falloff_distance', 250)
@@ -109,6 +64,10 @@ function Main:update(dt)
   self.world:update(dt)
   for i,player in ipairs(self.players) do
     player:update(dt)
+  end
+
+  for i,powerup in ipairs(self.powerups) do
+    powerup:update(dt)
   end
 
   for i,player in ipairs(self.players) do
@@ -130,7 +89,18 @@ function Main:draw()
 
   self.map:draw()
 
+  for i,powerup in ipairs(self.powerups) do
+    powerup:draw()
+  end
+
   physicsDebugDraw()
+
+  for i,player in ipairs(self.players) do
+    player:draw()
+  end
+
+  self.camera:unset()
+  push:finish()
 
   g.push('all')
   g.setCanvas(self.light_overlay)
@@ -150,14 +120,6 @@ function Main:draw()
     g.draw(static_light.mesh, static_light.x, static_light.y)
   end
   g.pop()
-
-  for i,player in ipairs(self.players) do
-    player:draw()
-  end
-
-  self.camera:unset()
-  push:finish()
-
   g.draw(self.light_overlay)
 
   g.push('all')

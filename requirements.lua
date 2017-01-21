@@ -38,6 +38,7 @@ Base = require("base")
 Game = require("game")
 Map = require("Map")
 Player = require("player.player")
+Powerup = require('powerups.powerup')
 
 Direction = require("direction")
 

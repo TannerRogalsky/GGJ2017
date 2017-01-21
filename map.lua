@@ -143,13 +143,6 @@ function Map:draw()
   g.setColor(255, 255, 255)
   g.draw(self.spritebatch)
 
-  if game.debug then
-    g.setColor(255, 0, 0, 255 / 4)
-    local w, h = push:getWidth() / width, push:getHeight() / height
-    for _,deadend in ipairs(self.deadends) do
-      g.rectangle('fill', (deadend.x - 1) * w, (deadend.y - 1) * h, w, h)
-    end
-  end
   g.pop()
 end
 
