@@ -46,12 +46,15 @@ end
 function Menu:enteredState()
   self.joysticks = love.joystick.getJoysticks()
 
+  self.title_text_shader = g.newShader('shaders/title_text_shader.glsl')
+
   local w, h = push:getWidth(), push:getHeight()
 
   self.selectors = {}
   for i,v in ipairs(self.joysticks) do
     local x, y = w / 2, h / 2
     self.selectors[i] = {
+      index = i,
       attacker = true,
       start_x = x, start_y = y,
       x = x, y = y,
@@ -60,6 +63,7 @@ function Menu:enteredState()
       joystick = self.joysticks[i]
     }
     self.selectors[i + 2] = {
+      index = i,
       defender = true,
       start_x = x, start_y = y,
       x = x, y = y,
@@ -91,9 +95,12 @@ function Menu:enteredState()
 
   self.start_timer = nil
   self.players = {}
+  self.t = 0
 end
 
 function Menu:update(dt)
+  self.t = self.t + dt
+  self.title_text_shader:send('time', self.t)
   for i,joystick in ipairs(self.joysticks) do
     local dx = joystick:getGamepadAxis("leftx")
     local dy = joystick:getGamepadAxis("lefty")
@@ -143,6 +150,8 @@ end
 function Menu:draw()
   push:start()
 
+  g.draw(game.preloaded_images['title_bg.png'])
+
   for i,field in ipairs(self.player_selection_fields) do
     local ox, oy = field.x - field.w / 2, field.y - field.h / 2
     g.setColor(255, 255, 255)
@@ -158,16 +167,28 @@ function Menu:draw()
 
   g.setColor(255, 255, 255)
   for i,p in ipairs(self.selectors) do
-    g.draw(p.mesh, p.x, p.y, math.atan2(p.vy, p.vx) + math.pi / 2)
+    if p.attacker then
+      local angle = math.atan2(p.vy, p.vx) + math.pi / 2
+      g.draw(p.mesh, p.x, p.y, angle)
+      do
+        local index = i == 1 and 1 or 2
+        local quad = game.sprites.quads['player_' .. index .. '_sword']
+        g.draw(game.sprites.texture, quad, p.x, p.y, angle + math.pi)
+      end
+    else
+      g.draw(p.mesh, p.x, p.y, self.t * 1.5)
+    end
   end
 
   g.push('all')
-  g.setFont(self.preloaded_fonts['04b03_24'])
+  g.setFont(self.preloaded_fonts['04b03_64'])
   if self.start_timer then
     local x, y = push:getDimensions()
     g.print(math.ceil(self.start_timer.time - self.start_timer.running), x / 2, y / 2)
   end
-  g.printf('Doppel', 0, push:getHeight() * 0.1, push:getWidth(), 'center')
+  g.setColor(217, 17, 197)
+  g.setShader(self.title_text_shader)
+  g.printf('N E O N\nS A M U R A I', 0, push:getHeight() * 0.1, push:getWidth(), 'center')
   g.pop()
 
   push:finish()

@@ -41,7 +41,7 @@ function Loading:enteredState()
     if self.debug then
       self:gotoState("QuickStart")
     else
-      self:gotoState("Menu")
+      self:gotoState("Title")
     end
   end)
 

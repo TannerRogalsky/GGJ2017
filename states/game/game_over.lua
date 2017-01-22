@@ -68,7 +68,7 @@ function Over:draw()
   love.graphics.setStencilTest('greater', 0)
   for i,player in ipairs(self.players) do
     for _,defender in ipairs(player.defenders) do
-      local quad = self.sprites.quads['player_' .. i .. '_life_ring']
+      local quad = self.sprites.quads['player_' .. math.abs(player.group_index) .. '_life_ring']
       g.draw(self.sprites.texture, quad, defender.x, defender.y, 0, 2, 2, 32 / 2, 32 / 2)
     end
   end
@@ -83,13 +83,13 @@ end
 
 function Over:keyreleased(key, scancode)
   if self.t >= MOVE_TO_ELLIPSE_TIME then
-    self:gotoState('Menu')
+    self:gotoState('Title')
   end
 end
 
 function Over:gamepadreleased(joystick, button)
   if self.t >= MOVE_TO_ELLIPSE_TIME then
-    self:gotoState('Menu')
+    self:gotoState('Title')
   end
 end
 

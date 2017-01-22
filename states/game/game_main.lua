@@ -59,15 +59,18 @@ function Main:enteredState()
       local selector1 = selection[field1]
       local field2 = self.player_selection_fields[i + 2]
       local selector2 = selection[field2]
+      assert(selector1.index == selector2.index)
+      local group_index = -selector1.index
 
       if selector1.defender then
         field1, field2 = field2, field1
         selector1, selector2 = selector2, selector1
+        -- group_index = group_index == -1 and -2 or -1
       end
 
       local x1, y1 = field1.gx * (width * 2 - 1) + 1, field1.gy * (height * 2 - 1) + 1
       local x2, y2 = field2.gx * (width * 2 - 1) + 1, field2.gy * (height * 2 - 1) + 1
-      self.players[i] = Player:new(selector1.joystick, selector1.mesh, selector2.mesh, x1, y1, x2, y2, -i)
+      self.players[i] = Player:new(selector1.joystick, selector1.mesh, selector2.mesh, x1, y1, x2, y2, group_index)
       self.players[i].defenders[1].fixture:setMask(2)
     end
 
@@ -151,7 +154,7 @@ function Main:draw()
   love.graphics.setStencilTest('greater', 0)
   for i,player in ipairs(self.players) do
     for _,defender in ipairs(player.defenders) do
-      local quad = self.sprites.quads['player_' .. i .. '_life_ring']
+      local quad = self.sprites.quads['player_' .. math.abs(player.group_index) .. '_life_ring']
       g.draw(self.sprites.texture, quad, defender.x, defender.y, 0, 2, 2, 32 / 2, 32 / 2)
     end
   end
