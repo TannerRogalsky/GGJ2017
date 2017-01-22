@@ -7,6 +7,7 @@ local physicsDebugDraw = require('physics_debug_draw')
 local physics_callbacks = require('physics_callbacks')
 local getNextSpawnPoint = require('get_next_spawn_point')
 local NewAttackerPowerup = require('powerups.new_attacker_powerup')
+local HealPowerup = require('powerups.heal_powerup')
 local healthBarStencil = require('health_bar_stencil')
 local LIGHT_FALLOFF_DISTANCE = 250
 
@@ -58,18 +59,27 @@ function Main:enteredState()
     for i=1,2 do
       local field1 = self.player_selection_fields[i]
       local selector1 = selection[field1]
-      local x1, y1 = field1.gx * (width * 2 - 1) + 1, field1.gy * (height * 2 - 1) + 1
       local field2 = self.player_selection_fields[i + 2]
       local selector2 = selection[field2]
+
+      if selector1.defender then
+        field1, field2 = field2, field1
+        selector1, selector2 = selector2, selector1
+      end
+
+      local x1, y1 = field1.gx * (width * 2 - 1) + 1, field1.gy * (height * 2 - 1) + 1
       local x2, y2 = field2.gx * (width * 2 - 1) + 1, field2.gy * (height * 2 - 1) + 1
       self.players[i] = Player:new(selector1.joystick, selector1.mesh, selector2.mesh, x1, y1, x2, y2, -i)
       self.players[i].defenders[1].fixture:setMask(2)
     end
+
+    self.players[1].color = {255/255,75/255,83/255}
+    self.players[2].color = {25/255,151/255,255/255}
   end
 
   for i=1,5 do
     local x, y = self.map:gridToPixel(getNextSpawnPoint(self))
-    self.powerups[i] = NewAttackerPowerup:new(x, y, 3)
+    self.powerups[i] = HealPowerup:new(x, y, 1)
   end
 
   self.light_overlay = g.newCanvas(g.getWidth(), g.getHeight(), 'normal')

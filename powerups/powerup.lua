@@ -41,6 +41,13 @@ function Powerup:draw()
   g.push('all')
   g.setColor(217, 17, 197)
   g.setShader(powerup_shader)
+  if self.timer then
+    powerup_shader:send('gradient_colors',
+      self.timer.args[2].owner.color, {1.0, 1.0, 1.0}, nil)
+  else
+    local c1, c2 = unpack(self.colors)
+    powerup_shader:send('gradient_colors', c1, c2, nil)
+  end
   g.translate(self.x, self.y)
   g.draw(self.mesh)
   if self.timer then

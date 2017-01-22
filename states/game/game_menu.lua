@@ -1,6 +1,7 @@
 local Menu = Game:addState('Menu')
 local hsl = require('lib.hsl')
 local getUVs = require('getUVs')
+local TIME_TO_START = 3
 
 local function circleInRectangle(cx, cy, cr, x1, y1, x2, y2)
   -- x1, y1 = x1 + cr, y1 + cr
@@ -51,6 +52,7 @@ function Menu:enteredState()
   for i,v in ipairs(self.joysticks) do
     local x, y = w / 2, h / 2
     self.selectors[i] = {
+      attacker = true,
       start_x = x, start_y = y,
       x = x, y = y,
       vx = 0, vy = 0,
@@ -58,6 +60,7 @@ function Menu:enteredState()
       joystick = self.joysticks[i]
     }
     self.selectors[i + 2] = {
+      defender = true,
       start_x = x, start_y = y,
       x = x, y = y,
       vx = 0, vy = 0,
@@ -129,7 +132,7 @@ function Menu:update(dt)
   if not playersSelected and self.start_timer then
     self.start_timer = nil
   elseif playersSelected and self.start_timer == nil then
-    self.start_timer = cron.after(5, function()
+    self.start_timer = cron.after(TIME_TO_START, function()
       self:gotoState("Main")
     end)
   end

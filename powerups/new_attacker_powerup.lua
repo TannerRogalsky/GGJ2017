@@ -4,6 +4,8 @@ local AttackCharacter = require('player.attack_character')
 
 function NewAttackerPowerup:initialize(...)
   Powerup.initialize(self, ...)
+
+  self.colors = {{217/255, 17/255, 197/255}, {0.956, 0.682, 0.207}}
 end
 
 function NewAttackerPowerup:trigger(triggerer)
