@@ -1,9 +1,10 @@
 local NewAttackerPowerup = class('NewAttackerPowerup', Powerup)
 local getNextSpawnPoint = require('get_next_spawn_point')
 local AttackCharacter = require('player.attack_character')
+local TIME_TO_TRIGGER = 4
 
-function NewAttackerPowerup:initialize(...)
-  Powerup.initialize(self, ...)
+function NewAttackerPowerup:initialize(x, y)
+  Powerup.initialize(self, x, y, TIME_TO_TRIGGER)
 
   self.colors = {{217/255, 17/255, 197/255}, {0.956, 0.682, 0.207}}
 end

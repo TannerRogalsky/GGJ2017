@@ -1,9 +1,10 @@
 local HealPowerup = class('HealPowerup', Powerup)
 local getNextSpawnPoint = require('get_next_spawn_point')
 local AttackCharacter = require('player.attack_character')
+local TIME_TO_TRIGGER = 2
 
-function HealPowerup:initialize(...)
-  Powerup.initialize(self, ...)
+function HealPowerup:initialize(x, y)
+  Powerup.initialize(self, x, y, TIME_TO_TRIGGER)
 
   self.colors = {{0, 1, 0}, {0.956, 0.682, 0.207}}
 end

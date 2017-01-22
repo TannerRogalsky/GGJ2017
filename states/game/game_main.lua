@@ -6,8 +6,6 @@ local buildLightOverlay = require('light.build_light_overlay')
 local physicsDebugDraw = require('physics_debug_draw')
 local physics_callbacks = require('physics_callbacks')
 local getNextSpawnPoint = require('get_next_spawn_point')
-local NewAttackerPowerup = require('powerups.new_attacker_powerup')
-local HealPowerup = require('powerups.heal_powerup')
 local healthBarStencil = require('health_bar_stencil')
 local LIGHT_FALLOFF_DISTANCE = 250
 
@@ -77,10 +75,7 @@ function Main:enteredState()
     self.players[2].color = {25/255,151/255,255/255}
   end
 
-  for i=1,5 do
-    local x, y = self.map:gridToPixel(getNextSpawnPoint(self))
-    self.powerups[i] = HealPowerup:new(x, y, 1)
-  end
+  self.powerup_spawner = PowerupSpawner:new()
 
   self.light_overlay = g.newCanvas(g.getWidth(), g.getHeight(), 'normal')
   self.player_light_falloff_shader = g.newShader('shaders/player_light_falloff.glsl')
@@ -92,6 +87,7 @@ end
 function Main:update(dt)
   self.t = self.t + dt
   Powerup.powerup_shader:send('time', self.t)
+  self.powerup_spawner:update(dt)
   self.world:update(dt)
   for i,player in ipairs(self.players) do
     player:update(dt)
@@ -161,6 +157,9 @@ function Main:draw()
   end
   love.graphics.setStencilTest()
   g.pop()
+
+  local time_til_spawn = self.powerup_spawner.timer.time - self.powerup_spawner.timer.running
+  g.printf('New Powerups: ' .. math.round(time_til_spawn, 1), 0, 0, push:getWidth(), 'center')
 
   self.camera:unset()
   push:finish()
