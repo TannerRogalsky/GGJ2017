@@ -14,7 +14,7 @@ local powerup_types = {
 }
 
 local function spawn(self)
-  for i=0,love.math.random(NEXT_N_MIN, NEXT_N_MAX) do
+  for i=0,love.math.random(NEXT_N_MIN, NEXT_N_MAX)-1 do
     if #game.powerups >= MAX_POWERUPS then break end
 
     local x, y = game.map:gridToPixel(getNextSpawnPoint(game))
