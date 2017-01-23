@@ -154,15 +154,19 @@ function Menu:draw()
 
   for i,field in ipairs(self.player_selection_fields) do
     local ox, oy = field.x - field.w / 2, field.y - field.h / 2
-    g.setColor(255, 255, 255)
+    local alpha = 150
+    g.setColor(255, 255, 255, alpha)
     for i,p in ipairs(self.selectors) do
       if circleInRectangle(p.x, p.y, 20, ox, oy, ox + field.w, oy + field.h) then
-        g.setColor(hsl(i / #self.selectors, 1, 0.5))
+        if p.index == 1 then
+          g.setColor(255,75,83,alpha)
+        else
+          g.setColor(25,151,255,alpha)
+        end
+        break
       end
     end
     g.rectangle('fill', ox, oy, field.w, field.h)
-    -- g.setColor(0, 0, 0)
-    -- g.printf('Player ' .. i, ox, oy + field.h * 0.3, field.w, 'center')
   end
 
   g.setColor(255, 255, 255)
@@ -186,6 +190,8 @@ function Menu:draw()
     local x, y = push:getDimensions()
     g.print(math.ceil(self.start_timer.time - self.start_timer.running), x / 2, y / 2)
   end
+  g.setColor(0, 0, 0)
+  g.printf('N E O N\nS A M U R A I', 2, push:getHeight() * 0.1 + 2, push:getWidth(), 'center')
   g.setColor(217, 17, 197)
   g.setShader(self.title_text_shader)
   g.printf('N E O N\nS A M U R A I', 0, push:getHeight() * 0.1, push:getWidth(), 'center')

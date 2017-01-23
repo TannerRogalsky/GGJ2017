@@ -35,6 +35,8 @@ function QuickStart:enteredState()
   for i,v in ipairs(self.joysticks) do
     local x, y = w / 2, h / 2
     self.selectors[i] = {
+      index = i,
+      attacker = true,
       start_x = x, start_y = y,
       x = x, y = y,
       vx = 0, vy = 0,
@@ -42,6 +44,8 @@ function QuickStart:enteredState()
       joystick = self.joysticks[i]
     }
     self.selectors[i + 2] = {
+      index = i,
+      defender = true,
       start_x = x, start_y = y,
       x = x, y = y,
       vx = 0, vy = 0,

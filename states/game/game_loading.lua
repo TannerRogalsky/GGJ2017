@@ -41,6 +41,10 @@ function Loading:enteredState()
     if self.debug then
       self:gotoState("QuickStart")
     else
+      local source = love.audio.newSource('sounds/neon_samurai.ogg')
+      source:setLooping(true)
+      source:play()
+
       self:gotoState("Title")
     end
   end)

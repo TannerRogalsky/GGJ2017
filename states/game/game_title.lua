@@ -6,7 +6,7 @@ end
 function Title:draw()
   push:start()
 
-  g.draw(game.preloaded_images['title.png'])
+  g.draw(game.preloaded_images['title_gamepad.png'])
 
   push:finish()
 end

@@ -36,7 +36,7 @@ growingTree = require('map.growing_tree')
 
 Base = require("base")
 Game = require("game")
-Map = require("Map")
+Map = require("map")
 Player = require("player.player")
 Powerup = require('powerups.powerup')
 PowerupSpawner = require('powerups.spawner')

@@ -72,10 +72,13 @@ function Main:enteredState()
       local x2, y2 = field2.gx * (width * 2 - 1) + 1, field2.gy * (height * 2 - 1) + 1
       self.players[i] = Player:new(selector1.joystick, selector1.mesh, selector2.mesh, x1, y1, x2, y2, group_index)
       self.players[i].defenders[1].fixture:setMask(2)
-    end
 
-    self.players[1].color = {255/255,75/255,83/255}
-    self.players[2].color = {25/255,151/255,255/255}
+      if group_index == -1 then
+        self.players[i].color = {255/255,75/255,83/255}
+      else
+        self.players[i].color = {25/255,151/255,255/255}
+      end
+    end
   end
 
   self.powerup_spawner = PowerupSpawner:new()
