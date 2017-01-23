@@ -50,8 +50,27 @@ function Menu:enteredState()
 
   local w, h = push:getWidth(), push:getHeight()
 
+  local keyboard_controls = {{
+      directions = {
+        w = {x = 0, y = -1},
+        s = {x = 0, y = 1},
+        a = {x = -1, y = 0},
+        d = {x = 1, y = 0},
+      },
+      space = 'attack'
+    }, {
+      directions = {
+        up = {x = 0, y = -1},
+        down = {x = 0, y = 1},
+        left = {x = -1, y = 0},
+        right = {x = 1, y = 0},
+      },
+      ['return'] = 'attack'
+    }
+  }
+
   self.selectors = {}
-  for i,v in ipairs(self.joysticks) do
+  for i=1,2 do
     local x, y = w / 2, h / 2
     self.selectors[i] = {
       index = i,
@@ -60,7 +79,8 @@ function Menu:enteredState()
       x = x, y = y,
       vx = 0, vy = 0,
       mesh = getMesh(quads.attackers[i]),
-      joystick = self.joysticks[i]
+      joystick = self.joysticks[i],
+      keyboard = keyboard_controls[i]
     }
     self.selectors[i + 2] = {
       index = i,
@@ -69,7 +89,8 @@ function Menu:enteredState()
       x = x, y = y,
       vx = 0, vy = 0,
       mesh = getMesh(quads.defenders[i]),
-      joystick = self.joysticks[i]
+      joystick = self.joysticks[i],
+      keyboard = keyboard_controls[i]
     }
   end
 
@@ -101,11 +122,23 @@ end
 function Menu:update(dt)
   self.t = self.t + dt
   self.title_text_shader:send('time', self.t)
-  for i,joystick in ipairs(self.joysticks) do
-    local dx = joystick:getGamepadAxis("leftx")
-    local dy = joystick:getGamepadAxis("lefty")
-    if math.abs(dx) < 0.2 then dx = 0 end
-    if math.abs(dy) < 0.2 then dy = 0 end
+  for i=1,2 do
+    local dx, dy = 0, 0
+    if self.selectors[i].joystick then
+      local joystick = self.selectors[i].joystick
+      dx = joystick:getGamepadAxis("leftx")
+      dy = joystick:getGamepadAxis("lefty")
+      if math.abs(dx) < 0.2 then dx = 0 end
+      if math.abs(dy) < 0.2 then dy = 0 end
+    else
+      local isDown = love.keyboard.isDown
+      for k,v in pairs(self.selectors[i].keyboard.directions) do
+        if isDown(k) then
+          dx = dx + v.x
+          dy = dy + v.y
+        end
+      end
+    end
 
     if dx ~= 0 or dy ~= 0 then
       local p = self.selectors[i]

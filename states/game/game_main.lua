@@ -70,7 +70,7 @@ function Main:enteredState()
 
       local x1, y1 = field1.gx * (width * 2 - 1) + 1, field1.gy * (height * 2 - 1) + 1
       local x2, y2 = field2.gx * (width * 2 - 1) + 1, field2.gy * (height * 2 - 1) + 1
-      self.players[i] = Player:new(selector1.joystick, selector1.mesh, selector2.mesh, x1, y1, x2, y2, group_index)
+      self.players[i] = Player:new(selector1.joystick, selector1.keyboard, selector1.mesh, selector2.mesh, x1, y1, x2, y2, group_index)
       self.players[i].defenders[1].fixture:setMask(2)
 
       if group_index == -1 then
@@ -184,8 +184,8 @@ function Main:mousereleased(x, y, button, isTouch)
 end
 
 function Main:keypressed(key, scancode, isrepeat)
-  if key == 'r' then
-    self:gotoState('QuickStart')
+  for i,player in ipairs(self.players) do
+    player:keypressed(key)
   end
 end
 
@@ -196,14 +196,6 @@ function Main:gamepadpressed(joystick, button)
   for i,player in ipairs(self.players) do
     if player.joystick == joystick then
       player:gamepadpressed(button)
-    end
-  end
-end
-
-function Main:gamepadreleased(joystick, button)
-  for i,player in ipairs(self.players) do
-    if player.joystick == joystick then
-      player:gamepadreleased(button)
     end
   end
 end

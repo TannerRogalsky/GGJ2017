@@ -7,11 +7,12 @@ local AttackCharacter = require('player.attack_character')
 local DefenseCharacter = require('player.defense_character')
 local getUVs = require('getUVs')
 
-function Player:initialize(joystick, attacker_mesh, defender_mesh, x1, y1, x2, y2, group_index)
+function Player:initialize(joystick, keyboard, attacker_mesh, defender_mesh, x1, y1, x2, y2, group_index)
   Base.initialize(self)
 
   assert(is_num(group_index))
 
+  self.keyboard = keyboard
   self.joystick = joystick
   self.attacker_mesh = attacker_mesh
   self.defender_mesh = defender_mesh
@@ -36,12 +37,24 @@ function Player:update(dt)
     attacker:update(dt)
   end
 
-  local dx = self.joystick:getGamepadAxis("leftx")
-  local dy = self.joystick:getGamepadAxis("lefty")
-  if math.abs(dx) < 0.2 then dx = 0 end
-  if math.abs(dy) < 0.2 then dy = 0 end
-  local phi = math.atan2(dy, dx)
+  local dx, dy = 0, 0
 
+  if self.joystick then
+    dx = self.joystick:getGamepadAxis("leftx")
+    dy = self.joystick:getGamepadAxis("lefty")
+    if math.abs(dx) < 0.2 then dx = 0 end
+    if math.abs(dy) < 0.2 then dy = 0 end
+  else
+    local isDown = love.keyboard.isDown
+    for k,v in pairs(self.keyboard.directions) do
+      if isDown(k) then
+        dx = dx + v.x
+        dy = dy + v.y
+      end
+    end
+  end
+
+  local phi = math.atan2(dy, dx)
   for _,attacker in ipairs(self.attackers) do
     if dx ~= 0 or dy ~= 0 then attacker:setAngle(phi) end
     attacker:setLinearVelocity(dx * attacker.speed, dy * attacker.speed)
@@ -59,7 +72,12 @@ function Player:gamepadpressed(button)
   end
 end
 
-function Player:gamepadreleased(button)
+function Player:keypressed(button)
+  if self.keyboard[button] == 'attack' then
+    for _,attacker in ipairs(self.attackers) do
+      attacker:gamepadpressed('a')
+    end
+  end
 end
 
 function Player:draw()

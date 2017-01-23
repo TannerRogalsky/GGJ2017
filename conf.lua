@@ -41,7 +41,7 @@ function love.conf(t)
 
   t.releases = {
     title = t.window.title,
-    package = 'com.tannerrogalsky.doppel',
+    package = 'com.tannerrogalsky.neon_samurai',
     loveVersion = t.version,
     version = nil,
     author = 'Tanner Rogalsky',
