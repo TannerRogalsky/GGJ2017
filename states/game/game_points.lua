@@ -1,63 +1,96 @@
 local Points = Game:addState('Points')
+local ffi = require('ffi')
+ffi.cdef[[
+typedef struct {
+  float x, y;
+  float s, t;
+  unsigned char r, g, b, a;
+} fm_vertex;
+]]
+
+local incs = { 1391376,
+               463792, 198768, 86961, 33936,
+               13776, 4592, 1968, 861, 336,
+               112, 48, 21, 7, 3, 1 }
+local temp = ffi.new('fm_vertex')
+local struct_size = ffi.sizeof('fm_vertex')
+local function shellsort(t, n, before)
+  for _, h in ipairs(incs) do
+    for i = h, n - 1 do
+      ffi.copy(temp, t[i], struct_size)
+      for j = i - h, 0, -h do
+        local testval = t[j]
+        if not before(temp, testval) then break end
+        t[i] = testval; i = j
+      end
+      t[i] = temp
+    end
+  end
+  return t
+end
 
 local function getIsLess(a, b)
-  if a[1] == 0 and a[2] == 0 then
+  if a.x == 0 and a.y == 0 then
     return true
-  elseif b[1] == 0 and b[2] == 0 then
+  elseif b.x == 0 and b.y == 0 then
     return false
   end
-  if a[1] >= 0 and b[1] < 0 then return true end
-  if a[1] < 0 and b[1] >= 0 then return false end
-  if a[1] == 0 and b[1] == 0 then
-    if a[2] >= 0 or b[2] >= 0 then return a[2] > b[2] end
-    return b[2] > a[2]
+  if a.x >= 0 and b.x < 0 then return true end
+  if a.x < 0 and b.x >= 0 then return false end
+  if a.x == 0 and b.x == 0 then
+    if a.y >= 0 or b.y >= 0 then return a.y > b.y end
+    return b.y > a.y
   end
 
-  local det = (a[1]) * (b[2]) - (b[1]) * (a[2])
+  local det = (a.x) * (b.y) - (b.x) * (a.y)
   if det < 0 then
     return true
   elseif det > 0 then
     return false
   end
 
-  local d1 = (a[1]) * (a[1]) + (a[2]) * (a[2])
-  local d2 = (b[1]) * (b[1]) + (b[2]) * (b[2])
+  local d1 = (a.x) * (a.x) + (a.y) * (a.y)
+  local d2 = (b.x) * (b.x) + (b.y) * (b.y)
   return d1 > d2
 end
 
+local num_verts = 20
+local vertex_size = ffi.sizeof('fm_vertex')
+local pixel_size = ffi.sizeof('unsigned char[4]')
+local imageData = love.image.newImageData(num_verts / pixel_size * vertex_size, 1)
+local data = ffi.cast("fm_vertex*", imageData:getPointer())
+
 function Points:enteredState()
-  center_x, center_y = push:getWidth() / 2, push:getHeight() / 2
-  num_points = 20
-  points = {{0, 0}}
   love.math.setRandomSeed(0)
-  for i=1,num_points do
-    table.insert(points, {love.math.random(300) - 150, love.math.random(300) - 150})
+  center_x, center_y = push:getWidth() / 2, push:getHeight() / 2
+
+  for i=0,num_verts-1 do
+    local vertex = data[i]
+    vertex.r = 255;
+    vertex.g = 255;
+    vertex.b = 255;
+    vertex.a = 255;
   end
 
-  table.sort(points, getIsLess)
-  print(unpack(points[1]))
-  table.insert(points, {points[2][1], points[2][2]})
+  data[0].x, data[0].y = 0, 0
+  for i=1,num_verts-2 do
+    data[i].x = love.math.random(300) - 150
+    data[i].y = love.math.random(300) - 150
+  end
+  shellsort(data, num_verts - 1, getIsLess)
+  data[num_verts - 1].x, data[num_verts - 1].y = data[1].x, data[1].y
 
-  mesh = g.newMesh(points, 'fan', 'static')
+  -- for i=0, num_verts-1 do
+  --   print(data[i].x, data[i].y)
+  -- end
+
+  mesh = g.newMesh(num_verts, 'fan', 'static')
+  mesh:setVertices(imageData)
 end
 
 function Points:draw()
-  -- local verts = {}
-  -- for _,v in ipairs(points) do
-  --   table.insert(verts, v[1])
-  --   table.insert(verts, v[2])
-  -- end
-  -- g.setColor(255, 0, 0)
-  -- g.polygon('fill', verts)
   g.setWireframe(love.keyboard.isDown('space'))
   g.draw(mesh, center_x, center_y)
-  -- g.setWireframe(false)
-
-  -- g.setColor(255, 255, 255)
-  -- for i,point in ipairs(points) do
-  --   g.li, point[1], point[2])
-  --   g.print(i, point[1], point[2])
-  -- end
 end
 
 function Points:exitedState()
