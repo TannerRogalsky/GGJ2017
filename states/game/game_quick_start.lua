@@ -31,6 +31,25 @@ function QuickStart:enteredState()
 
   local w, h = push:getWidth(), push:getHeight()
 
+  local keyboard_controls = {{
+      directions = {
+        w = {x = 0, y = -1},
+        s = {x = 0, y = 1},
+        a = {x = -1, y = 0},
+        d = {x = 1, y = 0},
+      },
+      space = 'attack'
+    }, {
+      directions = {
+        up = {x = 0, y = -1},
+        down = {x = 0, y = 1},
+        left = {x = -1, y = 0},
+        right = {x = 1, y = 0},
+      },
+      ['return'] = 'attack'
+    }
+  }
+
   self.selectors = {}
   for i,v in ipairs(self.joysticks) do
     local x, y = w / 2, h / 2
@@ -42,6 +61,7 @@ function QuickStart:enteredState()
       vx = 0, vy = 0,
       mesh = getMesh(quads.attackers[i]),
       joystick = self.joysticks[i]
+      keyboard = keyboard_controls[i]
     }
     self.selectors[i + 2] = {
       index = i,
@@ -51,6 +71,7 @@ function QuickStart:enteredState()
       vx = 0, vy = 0,
       mesh = getMesh(quads.defenders[i]),
       joystick = self.joysticks[i]
+      keyboard = keyboard_controls[i]
     }
   end
 
