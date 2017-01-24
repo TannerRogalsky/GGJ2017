@@ -131,6 +131,15 @@ function Map:initialize(grid)
   local size = 20
   local w, h = push:getWidth() / self.width, push:getHeight() / self.height
   self.body = buildExtrusionPhysicsTerrain(game.world, grid, size, size / (w / h))
+  self.vertices = {}
+  for i,fixture in ipairs(self.body:getFixtureList()) do
+    local x1, y1, x2, y2, x3, y3, x4, y4 = fixture:getShape():getPoints()
+    table.insert(self.vertices, {x1, y1})
+    table.insert(self.vertices, {x2, y2})
+    table.insert(self.vertices, {x3, y3})
+    table.insert(self.vertices, {x4, y4})
+  end
+
   self.spritebatch = buildSpriteBatch(self.grid, self.width, self.height)
 
   self.deadends = findDeadEnds(self.grid)

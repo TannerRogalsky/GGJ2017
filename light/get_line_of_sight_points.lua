@@ -38,26 +38,18 @@ local function getIsLess(a, b)
   return d1 > d2
 end
 
-local function rayCastToPoint(hits, world, x1, y1, x2, y2, ...)
-  if x2 and y2 then
-    local hit = rayCastClosest(world, x1, y1, x2, y2)
-    if hit then
-      num_hits = num_hits + 1
-      hits[num_hits][1], hits[num_hits][2] = hit.x - x1, hit.y - y1
-    end
-    rayCastToPoint(hits, world, x1, y1, ...)
-  end
-end
-
 local function getLineOfSightPoints(hits, x1, y1)
   -- local MAX_DIST = 200
   local world = game.world
   local body = game.map.body
   num_hits = 1
   hits[1][1], hits[1][2] = 0, 0
-  for _,fixture in ipairs(body:getFixtureList()) do
-    local shape = fixture:getShape()
-    rayCastToPoint(hits, world, x1, y1, shape:getPoints())
+  for _,vertex in ipairs(game.map.vertices) do
+    local hit = rayCastClosest(world, x1, y1, vertex[1], vertex[2])
+    if hit then
+      num_hits = num_hits + 1
+      hits[num_hits][1], hits[num_hits][2] = hit.x - x1, hit.y - y1
+    end
   end
   shellsort(hits, getIsLess, num_hits)
   num_hits = num_hits + 1
