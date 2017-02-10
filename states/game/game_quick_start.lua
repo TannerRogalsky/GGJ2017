@@ -51,7 +51,7 @@ function QuickStart:enteredState()
   }
 
   self.selectors = {}
-  for i,v in ipairs(self.joysticks) do
+  for i=1,2 do
     local x, y = w / 2, h / 2
     self.selectors[i] = {
       index = i,
@@ -60,7 +60,7 @@ function QuickStart:enteredState()
       x = x, y = y,
       vx = 0, vy = 0,
       mesh = getMesh(quads.attackers[i]),
-      joystick = self.joysticks[i]
+      joystick = self.joysticks[i],
       keyboard = keyboard_controls[i]
     }
     self.selectors[i + 2] = {
@@ -70,7 +70,7 @@ function QuickStart:enteredState()
       x = x, y = y,
       vx = 0, vy = 0,
       mesh = getMesh(quads.defenders[i]),
-      joystick = self.joysticks[i]
+      joystick = self.joysticks[i],
       keyboard = keyboard_controls[i]
     }
   end
