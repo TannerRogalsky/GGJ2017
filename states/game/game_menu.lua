@@ -43,6 +43,13 @@ local function getMesh(sprite_name)
   return mesh
 end
 
+local square = g.newMesh({
+  {-0.5, -0.5, 0, 0},
+  {-0.5, 0.5, 0, 1},
+  {0.5, 0.5, 1, 1},
+  {0.5, -0.5, 1, 0},
+}, 'fan', 'static')
+
 function Menu:enteredState()
   self.joysticks = love.joystick.getJoysticks()
 
@@ -68,6 +75,8 @@ function Menu:enteredState()
       ['return'] = 'attack'
     }
   }
+
+  self.selection_square_shader = g.newShader('shaders/selection_square.glsl')
 
   self.selectors = {}
   for i=1,2 do
@@ -98,19 +107,19 @@ function Menu:enteredState()
     {
       gx = 0, gy = 0,
       x = 150, y = 150,
-      w = 150, h = 150
+      w = 160, h = 160
     }, {
       gx = 1, gy = 0,
       x = w - 150, y = 150,
-      w = 150, h = 150
+      w = 160, h = 160
     }, {
       gx = 1, gy = 1,
       x = w - 150, y = h - 150,
-      w = 150, h = 150
+      w = 160, h = 160
     }, {
       gx = 0, gy = 1,
       x = 150, y = h - 150,
-      w = 150, h = 150
+      w = 160, h = 160
     }
   }
 
@@ -122,6 +131,7 @@ end
 function Menu:update(dt)
   self.t = self.t + dt
   self.title_text_shader:send('time', self.t)
+  self.selection_square_shader:send('time', self.t)
   for i=1,2 do
     local dx, dy = 0, 0
     if self.selectors[i].joystick then
@@ -185,6 +195,8 @@ function Menu:draw()
 
   g.draw(game.preloaded_images['title_bg.png'])
 
+  g.push('all')
+  g.setShader(self.selection_square_shader)
   for i,field in ipairs(self.player_selection_fields) do
     local ox, oy = field.x - field.w / 2, field.y - field.h / 2
     local alpha = 150
@@ -199,10 +211,11 @@ function Menu:draw()
         break
       end
     end
-    g.rectangle('fill', ox, oy, field.w, field.h)
+    g.draw(square, field.x, field.y, 0, field.w, field.h)
+    -- g.rectangle('fill', ox, oy, field.w, field.h)
   end
+  g.pop()
 
-  g.setColor(255, 255, 255)
   for i,p in ipairs(self.selectors) do
     if p.attacker then
       local angle = math.atan2(p.vy, p.vx) + math.pi / 2
