@@ -9,9 +9,12 @@ end
 
 function Over:enteredState()
   self.winner = self.players[1]
+  self.loser = self.players[2]
   for i,player in ipairs(self.players) do
     if #player.defenders > 0 then
       self.winner = player
+    else
+      self.loser = player
     end
   end
   self.t = 0
@@ -47,6 +50,8 @@ function Over:draw()
     powerup:draw()
   end
 
+  self.loser:draw()
+
   g.push('all')
   g.setCanvas(self.light_overlay)
   g.clear(0, 0, 0, 255 * 0.6)
@@ -59,9 +64,7 @@ function Over:draw()
   g.pop()
   g.draw(self.light_overlay)
 
-  for i,player in ipairs(self.players) do
-    player:draw()
-  end
+  self.winner:draw()
 
   g.push('all')
   love.graphics.stencil(healthBarStencil, 'replace', 1)
