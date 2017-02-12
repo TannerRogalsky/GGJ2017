@@ -7,7 +7,7 @@ local physicsDebugDraw = require('physics_debug_draw')
 local physics_callbacks = require('physics_callbacks')
 local getNextSpawnPoint = require('get_next_spawn_point')
 local healthBarStencil = require('health_bar_stencil')
-local LIGHT_FALLOFF_DISTANCE = 250
+LIGHT_FALLOFF_DISTANCE = 250
 
 local defenders_light_mesh = g.newMesh({
   {-LIGHT_FALLOFF_DISTANCE, -LIGHT_FALLOFF_DISTANCE},
@@ -140,7 +140,7 @@ function Main:draw()
   g.setColor(255, 255, 255, 255 * 0.25)
   for i,player in ipairs(self.players) do
     for _,attacker in ipairs(player.attackers) do
-      buildLightOverlay(attacker.x, attacker.y)
+      buildLightOverlay(attacker.x, attacker.y, attacker.light_filter)
     end
     for _,defender in ipairs(player.defenders) do
       g.draw(defenders_light_mesh, defender.x, defender.y)

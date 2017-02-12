@@ -17,6 +17,10 @@ function AttackCharacter:initialize(...)
   self.sword = Sword:new(body, fixture, joint)
   self.sword.fixture:setGroupIndex(self.owner.group_index)
 
+  self.light_filter = function(fixture)
+    return fixture:isSensor()
+  end
+
   local oldSetAngle = self.setAngle
   function self:setAngle(phi)
     oldSetAngle(self, phi)

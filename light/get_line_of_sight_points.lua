@@ -1,16 +1,12 @@
+local queryBBox = require('light.query_bbox')
 local rayCastClosest = require('light.raycast_closest')
 local shellsort = require('light.shellsort')
 local num_hits = 0
 
-local function len(x, y)
-  return x * x + y * y
-end
-
 local function rotate(phi, x,y, ox,oy)
   x, y = x - ox, y - oy
   local c, s = math.cos(phi), math.sin(phi)
-  local nx, ny = c*x - s*y, s*x + c*y
-  return nx + x, ny + y
+  return c*x - s*y + ox,  s*x + c*y + oy
 end
 
 local function getIsLess(a, b)
@@ -38,17 +34,49 @@ local function getIsLess(a, b)
   return d1 > d2
 end
 
-local function getLineOfSightPoints(hits, x1, y1)
-  -- local MAX_DIST = 200
+local function addHit(hits, x, y)
+  num_hits = num_hits + 1
+  hits[num_hits][1], hits[num_hits][2] = x, y
+end
+
+local function rotateAndCast(world, hits, filter, x1, y1, x2, y2, phi)
+  x2, y2 = rotate(phi, x2, y2, x1, y1)
+  local hit = rayCastClosest(world, x1, y1, x2, y2, filter)
+  if hit then
+    addHit(hits, hit.x - x1, hit.y - y1)
+  end
+  return hit
+end
+
+local function rayCastFast(world, hits, filter, x1, y1, body, x2, y2, ...)
+  if x2 and y2 then
+    x2, y2 = body:getWorldPoint(x2, y2)
+
+    local dx = x2 - x1
+    local dy = y2 - y1
+    -- TODO might be possible to optimize the length here
+    local x4 = x2 + (dx) * 100
+    local y4 = y2 + (dy) * 100
+
+    rotateAndCast(world, hits, filter, x1, y1, x4, y4, 0)
+    rotateAndCast(world, hits, filter, x1, y1, x4, y4, 0.0001)
+    rotateAndCast(world, hits, filter, x1, y1, x4, y4, -0.0001)
+
+    rayCastFast(world, hits, filter, x1, y1, body, ...)
+  end
+end
+
+local function getLineOfSightPoints(hits, x, y, filter)
   local world = game.world
   local body = game.map.body
   num_hits = 1
   hits[1][1], hits[1][2] = 0, 0
-  for _,vertex in ipairs(game.map.vertices) do
-    local hit = rayCastClosest(world, x1, y1, vertex[1], vertex[2])
-    if hit then
-      num_hits = num_hits + 1
-      hits[num_hits][1], hits[num_hits][2] = hit.x - x1, hit.y - y1
+  local bx1, by1 = x - LIGHT_FALLOFF_DISTANCE, y - LIGHT_FALLOFF_DISTANCE
+  local bx2, by2 = x + LIGHT_FALLOFF_DISTANCE, y + LIGHT_FALLOFF_DISTANCE
+  for i,fixture in ipairs(queryBBox(world, bx1, by1, bx2, by2)) do
+    local shape = fixture:getShape()
+    if shape.getPoints then
+      rayCastFast(world, hits, filter, x, y, fixture:getBody(), shape:getPoints())
     end
   end
   shellsort(hits, getIsLess, num_hits)
