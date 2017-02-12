@@ -6,7 +6,7 @@ local TIME_TO_TRIGGER = 2
 function HealPowerup:initialize(x, y)
   Powerup.initialize(self, x, y, TIME_TO_TRIGGER)
 
-  self.colors = {{0, 1, 0}, {0.956, 0.682, 0.207}}
+  self.colors = {{59 / 255, 233 / 255, 111 / 255}, {0.5, 0.5, 0.7}}
 
   local old_draw = self.draw
   function self:draw()

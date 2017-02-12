@@ -15,7 +15,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
   if (abs(texture_coords.x) > 1.0 || abs(texture_coords.y) > 1.0) {
     texture_coords /= 2.0;
     float c = dot(texture_coords, texture_coords);
-    return vec4(color.rgb, 1.0 - c);
+    return vec4(gradient_colors[0], 1.0 - c);
   } else {
     float c = dot(texture_coords, texture_coords);
     float n = 3.0;
