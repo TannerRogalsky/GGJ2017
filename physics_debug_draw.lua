@@ -19,6 +19,8 @@ local function physicsDebugDraw()
           g.line(shape:getPoints())
         elseif shapeType == 'polygon' then
           g.polygon('line', shape:getPoints())
+        elseif shapeType == 'chain' then
+          g.line(shape:getPoints())
         end
       end
       g.pop()
