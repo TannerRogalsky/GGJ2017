@@ -1,7 +1,7 @@
 local getLineOfSightPoints = require('light.get_line_of_sight_points').fast
 
 local hits = {}
-local MAX_VERTS = 600 -- This will crash with different dungeon generation
+local MAX_VERTS = 1000 -- This will crash with different dungeon generation
 for i=1,MAX_VERTS do hits[i] = {0, 0} end
 local mesh = g.newMesh(MAX_VERTS, 'fan', 'stream')
 
