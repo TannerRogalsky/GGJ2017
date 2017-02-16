@@ -14,8 +14,7 @@ local function shuffle(t, r)
   return t
 end
 
-local function generate(width, height, modes, seed)
-  local r = love.math.newRandomGenerator(seed or 0)
+local function generate(width, height, modes, r)
   local grid = {}
   for y=1,height do
     grid[y] = {}

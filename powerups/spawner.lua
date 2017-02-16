@@ -14,15 +14,15 @@ local powerup_types = {
 }
 
 local function spawn(self)
-  for i=0,love.math.random(NEXT_N_MIN, NEXT_N_MAX)-1 do
+  for i=0,game.random:random(NEXT_N_MIN, NEXT_N_MAX)-1 do
     if #game.powerups >= MAX_POWERUPS then break end
 
     local x, y = game.map:gridToPixel(getNextSpawnPoint(game))
-    local Type = powerup_types[love.math.random(#powerup_types)]
+    local Type = powerup_types[game.random:random(#powerup_types)]
     table.insert(game.powerups, Type:new(x, y))
   end
 
-  self.timer = cron.after(love.math.random(NEXT_T_MIN, NEXT_T_MAX), spawn, self)
+  self.timer = cron.after(game.random:random(NEXT_T_MIN, NEXT_T_MAX), spawn, self)
 end
 
 function PowerupSpawner:initialize()

@@ -26,8 +26,9 @@ function Main:enteredState()
 
   local width, height = math.floor(16 * 0.4), math.floor(9 * 0.4)
   local seed = math.floor(love.math.random(math.pow(2, 53)))
+  self.random = love.math.newRandomGenerator(seed)
   print(string.format('Seed: %u', seed))
-  local grid = growingTree(width, height, {random = 1, newest = 1}, seed)
+  local grid = growingTree(width, height, {random = 1, newest = 1}, self.random)
   grid = symmetricalize(grid, 'both')
   self.map = Map:new(grid)
 
@@ -191,6 +192,10 @@ end
 function Main:keypressed(key, scancode, isrepeat)
   for i,player in ipairs(self.players) do
     player:keypressed(key)
+  end
+
+  if self.debug and key == 'r' then
+    self:gotoState('QuickStart')
   end
 end
 
