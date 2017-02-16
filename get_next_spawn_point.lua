@@ -38,14 +38,10 @@ local function get_next_spawn_point(game)
     getGridSpotsForPoint(bad_cells, powerup.x, powerup.y, width, height)
   end
 
-
-  local x = math.ceil(game.random:
-    random(1, width))
+  local x = math.ceil(game.random:random(1, width))
   local y = math.ceil(game.random:random(1, height))
-  while carefulGet(bad_cells,
-    x, y) do
-    x = math.ceil(game.random:
-      random(1, width))
+  while carefulGet(bad_cells, x, y) do
+    x = math.ceil(game.random:random(1, width))
     y = math.ceil(game.random:random(1, height))
   end
 
