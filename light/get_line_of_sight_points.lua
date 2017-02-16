@@ -34,21 +34,23 @@ local function getIsLess(a, b)
   return d1 > d2
 end
 
-local function addHit(hits, x, y)
+local function addHitFast(hits, x, y)
   num_hits = num_hits + 1
   hits[num_hits][1], hits[num_hits][2] = x, y
 end
 
-local function rotateAndCast(world, hits, filter, x1, y1, x2, y2, phi)
+local function addHitSlow(hits, x, y)
+  table.insert(hits, {x, y})
+end
+
+local function rotateAndCast(world, addHit, hits, filter, x1, y1, x2, y2, phi)
   x2, y2 = rotate(phi, x2, y2, x1, y1)
   local hit = rayCastClosest(world, x1, y1, x2, y2, filter)
-  if hit then
-    addHit(hits, hit.x - x1, hit.y - y1)
-  end
+  if hit then addHit(hits, hit.x - x1, hit.y - y1) end
   return hit
 end
 
-local function rayCastFast(world, hits, filter, x1, y1, body, x2, y2, ...)
+local function rayCast(world, addHit, hits, filter, x1, y1, body, x2, y2, ...)
   if x2 and y2 then
     x2, y2 = body:getWorldPoint(x2, y2)
 
@@ -58,11 +60,11 @@ local function rayCastFast(world, hits, filter, x1, y1, body, x2, y2, ...)
     local x4 = x2 + (dx) * 100
     local y4 = y2 + (dy) * 100
 
-    rotateAndCast(world, hits, filter, x1, y1, x4, y4, 0)
-    rotateAndCast(world, hits, filter, x1, y1, x4, y4, 0.0001)
-    rotateAndCast(world, hits, filter, x1, y1, x4, y4, -0.0001)
+    rotateAndCast(world, addHit, hits, filter, x1, y1, x4, y4, 0)
+    rotateAndCast(world, addHit, hits, filter, x1, y1, x4, y4, 0.0001)
+    rotateAndCast(world, addHit, hits, filter, x1, y1, x4, y4, -0.0001)
 
-    rayCastFast(world, hits, filter, x1, y1, body, ...)
+    rayCast(world, addHit, hits, filter, x1, y1, body, ...)
   end
 end
 
@@ -76,7 +78,7 @@ local function getLineOfSightPoints(hits, x, y, filter)
   for i,fixture in ipairs(queryBBox(world, bx1, by1, bx2, by2)) do
     local shape = fixture:getShape()
     if shape.getPoints then
-      rayCastFast(world, hits, filter, x, y, fixture:getBody(), shape:getPoints())
+      rayCast(world, addHitFast, hits, filter, x, y, fixture:getBody(), shape:getPoints())
     end
   end
   shellsort(hits, getIsLess, num_hits)
@@ -85,32 +87,15 @@ local function getLineOfSightPoints(hits, x, y, filter)
   return num_hits
 end
 
-local function rayCastToPointSlow(hits, world, x1, y1, x2, y2, ...)
-  if x2 and y2 then
-    local hit = rayCastClosest(world, x1, y1, x2, y2)
-    if hit then
-      table.insert(hits, {hit.x - x1, hit.y - y1})
-
-      -- expensive. comment out if necessary
-      local x3, y3 = rotate(0.001, x2, y2, x1, y1)
-      hit = rayCastClosest(world, x1, y1, x3, y3)
-      if hit then table.insert(hits, {hit.x - x1, hit.y - y1}) end
-      x3, y3 = rotate(-0.001, x2, y2, x1, y1)
-      hit = rayCastClosest(world, x1, y1, x3, y3)
-      if hit then table.insert(hits, {hit.x - x1, hit.y - y1}) end
-    end
-    rayCastToPointSlow(hits, world, x1, y1, ...)
-  end
-end
-
-local function getLineOfSightPointsSlow(x1, y1)
-  -- local MAX_DIST = 200
+local function getLineOfSightPointsSlow(x, y)
   local world = game.world
   local body = game.map.body
   local hits = {}
-  for _,fixture in ipairs(body:getFixtureList()) do
+  local bx1, by1 = x - LIGHT_FALLOFF_DISTANCE, y - LIGHT_FALLOFF_DISTANCE
+  local bx2, by2 = x + LIGHT_FALLOFF_DISTANCE, y + LIGHT_FALLOFF_DISTANCE
+  for i,fixture in ipairs(queryBBox(world, bx1, by1, bx2, by2)) do
     local shape = fixture:getShape()
-    rayCastToPointSlow(hits, world, x1, y1, shape:getPoints())
+    rayCast(world, addHitSlow, hits, filter, x, y, fixture:getBody(), shape:getPoints())
   end
   table.sort(hits, getIsLess)
   table.insert(hits, {hits[1][1], hits[1][2]})

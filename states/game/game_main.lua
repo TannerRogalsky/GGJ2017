@@ -44,7 +44,6 @@ function Main:enteredState()
   end
   for i=1,3 do
     local x, y = self.map:gridToPixel(getNextSpawnPoint(self))
-    -- print(x, y)
     table.insert(self.static_lights, {
       x = x,
       y = y,
