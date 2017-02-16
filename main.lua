@@ -9,13 +9,16 @@ function love.load(args)
   end
 
   local gameWidth, gameHeight = love.graphics.getDimensions()
-  -- local windowWidth, windowHeight = love.window.getDesktopDimensions()
-  local windowWidth, windowHeight = 1920, 1080
-  local windowWidth, windowHeight = gameWidth, gameHeight
+  local windowWidth, windowHeight = love.window.getDesktopDimensions()
+  local fullscreen = true
+  if windowWidth / windowHeight ~= gameWidth / gameHeight then
+    fullscreen = false
+    windowWidth, windowHeight = gameWidth, gameHeight
+  end
 
   g.setDefaultFilter('nearest', 'nearest')
   push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {
-    fullscreen = false,
+    fullscreen = fullscreen,
     resizable = false,
     canvas = false,
   })
