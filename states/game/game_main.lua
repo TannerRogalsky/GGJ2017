@@ -128,17 +128,15 @@ function Main:draw()
 
   -- physicsDebugDraw()
 
-  for i,player in ipairs(self.players) do
-    player:draw()
-  end
-
   g.push('all')
   g.setCanvas(self.light_overlay)
-  g.clear(0, 0, 0, 255 * 0.6)
+  g.clear(75, 120, 150, 255)
   g.setShader(self.player_light_falloff_shader)
-  g.setBlendMode('multiply')
-  g.setColor(255, 255, 255, 255 * 0.25)
+  g.setBlendMode('add')
+  g.setColor(255, 255, 255, 0)
   for i,player in ipairs(self.players) do
+    -- local red, green, blue = unpack(player.color)
+    -- g.setColor(red*255, green*255, blue*255)
     for _,attacker in ipairs(player.attackers) do
       buildLightOverlay(attacker.x, attacker.y, attacker.light_filter)
     end
@@ -146,11 +144,18 @@ function Main:draw()
       g.draw(defenders_light_mesh, defender.x, defender.y)
     end
   end
+  g.setColor(255, 255, 255, 0)
   for _,static_light in ipairs(self.static_lights) do
     g.draw(static_light.mesh, static_light.x, static_light.y)
   end
   g.pop()
-  g.draw(self.light_overlay)
+  g.setBlendMode('multiply')
+  g.draw(self.light_overlay, 0, 0, 0, push._INV_SCALE)
+  g.setBlendMode('alpha')
+
+  for i,player in ipairs(self.players) do
+    player:draw()
+  end
 
   g.push('all')
   love.graphics.stencil(healthBarStencil, 'replace', 1)
