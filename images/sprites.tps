@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.3.3</string>
         <key>fileName</key>
-        <string>/Users/tanner/code/lua/global_game_jam_2017/images/sprites.tps</string>
+        <string>/Users/tanner/code/lua/neon_samurai/images/sprites.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -231,6 +231,46 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">../source_images/Tile_Masks/tile_280_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_281_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_282_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_283_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_284_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_285_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_286_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_287_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_288_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_307_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_308_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_309_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_310_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_311_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_312_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_313_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_314_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_315_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_334_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_335_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_336_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_337_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_338_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_339_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_340_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_341_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_361_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_362_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_363_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_364_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_365_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_366_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_390_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_391_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_392_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_393_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_417_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_418_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_419_mask.png</key>
+            <key type="filename">../source_images/Tile_Masks/tile_420_mask.png</key>
             <key type="filename">../source_images/Tiles/tile_280.png</key>
             <key type="filename">../source_images/Tiles/tile_281.png</key>
             <key type="filename">../source_images/Tiles/tile_282.png</key>
@@ -290,6 +330,7 @@
             <filename>../source_images/Tiles</filename>
             <filename>../source_images/powerup_attack.png</filename>
             <filename>../source_images/powerup_health.png</filename>
+            <filename>../source_images/Tile_Masks</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

@@ -87,6 +87,8 @@ function Main:enteredState()
   self.player_light_falloff_shader = g.newShader('shaders/player_light_falloff.glsl')
   self.player_light_falloff_shader:send('falloff_distance', LIGHT_FALLOFF_DISTANCE)
 
+  self.map_shader = g.newShader('shaders/map_shader.glsl')
+
   g.setFont(self.preloaded_fonts['04b03_16'])
 end
 
@@ -120,7 +122,16 @@ function Main:draw()
   push:start()
   self.camera:set()
 
-  self.map:draw()
+  do
+    local t = self.t * math.pi * 2
+    g.push('all')
+    g.setShader(self.map_shader)
+    g.setColor((0.5 + 0.5 * math.cos(t)) * 255,
+               (0.5 + 0.5 * math.cos(t + math.pi)) * 255,
+               (0.5 + 0.5 * math.sin(t)) * 255)
+    self.map:draw()
+    g.pop()
+  end
 
   for i,powerup in ipairs(self.powerups) do
     powerup:draw()
@@ -163,7 +174,7 @@ function Main:draw()
   for i,player in ipairs(self.players) do
     for _,defender in ipairs(player.defenders) do
       local quad = self.sprites.quads['player_' .. math.abs(player.group_index) .. '_life_ring']
-      g.draw(self.sprites.texture, quad, defender.x, defender.y, 0, 2, 2, 32 / 2, 32 / 2)
+      g.draw(self.sprites.texture, quad, defender.x, defender.y, -player.t * 0.8, 2, 2, 32 / 2, 32 / 2)
     end
   end
   love.graphics.setStencilTest()

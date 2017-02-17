@@ -100,11 +100,20 @@ local function findDeadEnds(grid)
   return deadends
 end
 
+local function getViewport(quad, texture)
+  local w, h = texture:getDimensions()
+  local qx, qy, qw, qh = quad:getViewport()
+  return qx / w, qy / h, qw / w, qh / h
+end
+
 local function buildSpriteBatch(grid, width, height)
   local sprites = game.sprites
-  local batch = g.newSpriteBatch(sprites.texture, width * height, 'static')
   local w, h = push:getWidth() / width, push:getHeight() / height
+  local indices = {}
+  local vertices = {}
   local px, py
+
+  local index = 0
   for y=1,height do
     py = (y - 1) * h
     for x=1,width do
@@ -112,13 +121,36 @@ local function buildSpriteBatch(grid, width, height)
       local bits = grid[y][x]
       local tile_name = bitmask[bits]
       local quad = sprites.quads[tile_name]
-      local _, _, qw, qh = quad:getViewport()
-      -- g.draw(sprites.texture, quad, px, py, 0, w / qw, h / qh)
-      batch:add(quad, px, py, 0, w / qw, h / qh)
+      local mask_quad = sprites.quads[tile_name .. '_mask']
+      local mqx, mqy, mqw, mqh = getViewport(mask_quad, sprites.texture)
+      local qx, qy, qw, qh = getViewport(quad, sprites.texture)
+
+      vertices[index * 4 + 0 + 1] = {px, py, qx, qy, 255, 255, 255, 255, mqx, mqy}
+      vertices[index * 4 + 1 + 1] = {px, py + h, qx, qy + qh, 255, 255, 255, 255, mqx, mqy + mqh}
+      vertices[index * 4 + 2 + 1] = {px + w, py, qx + qw, qy, 255, 255, 255, 255, mqx + mqw, mqy}
+      vertices[index * 4 + 3 + 1] = {px + w, py + h, qx + qw, qy + qh, 255, 255, 255, 255, mqx + mqw, mqy + mqh}
+
+      table.insert(indices, index * 4 + 0 + 1)
+      table.insert(indices, index * 4 + 1 + 1)
+      table.insert(indices, index * 4 + 2 + 1)
+      table.insert(indices, index * 4 + 1 + 1)
+      table.insert(indices, index * 4 + 2 + 1)
+      table.insert(indices, index * 4 + 3 + 1)
+
+      index = index + 1
     end
   end
 
-  return batch
+  local mesh = g.newMesh({
+    {'VertexPosition', 'float', 2}, -- The x,y position of each vertex.
+    {'VertexTexCoord', 'float', 2}, -- The u,v texture coordinates of each vertex.
+    {'VertexColor', 'byte', 4},     -- The r,g,b,a color of each vertex.
+    {'VertexMaskCoord', 'float', 2},
+  }, vertices, 'triangles', 'static')
+  mesh:setTexture(sprites.texture)
+  mesh:setVertexMap(indices)
+
+  return mesh
 end
 
 function Map:initialize(grid)
@@ -146,10 +178,7 @@ function Map:initialize(grid)
 end
 
 function Map:draw()
-  g.push('all')
-  g.setColor(255, 255, 255)
   g.draw(self.spritebatch)
-  g.pop()
 end
 
 function Map:gridToPixel(x, y)
